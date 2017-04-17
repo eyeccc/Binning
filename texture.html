@@ -43,7 +43,7 @@ body {
 
 <!-- all possible options -->
 <div>
-<select id = "opts">
+<select id = "opts" autocomplete="off">
 	<option value="scatter" selected="selected">scatterplot</option>
 	<option value="blending">blending</option> 
 	<option value="pt1">point glyph (random)</option>
@@ -65,6 +65,18 @@ body {
 
 <script>
 
+var VISTYPE = {
+  scatter: 0,
+  blending: 1,
+  pt1: 2,
+  pt2: 3,
+  pt3: 4,
+  pie1: 5,
+  pie2: 6,
+  weaving1: 7,
+  weaving2: 8,
+  texture: 9
+};
 var margins = {top: 20, right: 20, bottom: 40, left: 40};
 
 
@@ -97,8 +109,7 @@ var colors = d3.scale.category10().range().slice(0, 4);
 var svgDefs = [
 	{
         name: "scatter",
-        classes: "pts",
-        title: "Scatterplot"
+        classes: "pts"
     }/*,
     {
         name: "bin",
@@ -221,13 +232,7 @@ svg.append('g')
     .attr('class', 'yaxis axis')
     .call(d3.svg.axis().orient("left").scale(y1));
 
-svg.append('g')
-    .attr('class', 'svg-label')
-    .attr('transform', 'translate(0,' + (height + 35) + ')')
-    .append('text')
-        .attr('x', width / 2)
-        .style('text-anchor', 'middle')
-        .text(function(d) { return d.title; });
+
 
     
 // only do this for hexsvgs
@@ -248,6 +253,7 @@ var ptsvgs = d3.selectAll('svg.pts > g');
 var points = ptsvgs.append('g').attr('class', 'points')
     .attr('clip-path', 'url(#clip)');
 
+// TODO: need to change the class name
 var binptsvgs = d3.selectAll('svg.binpts > g');
 var binpts_points = binptsvgs.append('g').attr('class', 'points')
     .attr('clip-path', 'url(#clip)');
@@ -263,65 +269,78 @@ var bin_lines = d3.selectAll('svg.texture > g')
 var attenuation = d3.scale.log().range([0,1]);
 
 var ptSize = 3;
-var hexagonRadius = 14.5; // need to be adjustable
+var hexagonRadius = 14.5; // TODO: need to be adjustable
 
 // <http://stackoverflow.com/questions/19911514/how-can-i-click-to-add-or-drag-in-d3>
 var ptData;
 var updateVis = function(selectedIndex) {
-    console.log(selectedIndex);
-	//testFunc(selectedIndex);
-	
+    console.log(selectedIndex); // TODO: remove this log
 	// remove all hexagons
 	d3.selectAll(".hexagons  path").remove();
 	// remove all points from scatter plot
 	points.selectAll('circle.point').remove();
 
-    if (selectedIndex === 0) {
-		var pts = points.selectAll('circle.point')
-        .data(ptData, function(d) { return d[3]; });
-    
-		pts.exit().remove();
-		pts.enter().append('circle')
-			.attr("class", "point")
-			.attr('r', ptSize)
-			.attr('cx', function(e) { return e[0]; })
-			.attr('cy', function(e) { return e[1]; })
-			.style('fill', function(e) { return colors[e[2]]; });
-	} else {
-		var hexbins = hexbin(ptData);
-		attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
-		var hex = hexagon.selectAll("path")
-			.data(hexbins, function(d) { return d.i + "," + d.j });
-
-		var colorBins = 8;
-		var lightnessScale = d3.scale.quantize()
-			.range(d3.range(colorBins).map(
-				d3.scale.linear()
-					.domain([0, colorBins-1])
-					.range(["#ffffff", "#000000"])
-					.interpolate(d3.interpolateLab)))
-			.domain(attenuation.domain());
+    switch (selectedIndex) {
+		case VISTYPE.scatter: //scatterplot
+			var pts = points.selectAll('circle.point')
+			.data(ptData, function(d) { return d[3]; });
+		
+			pts.exit().remove();
+			pts.enter().append('circle')
+				.attr("class", "point")
+				.attr('r', ptSize)
+				.attr('cx', function(e) { return e[0]; })
+				.attr('cy', function(e) { return e[1]; })
+				.style('fill', function(e) { return colors[e[2]]; });
+			break;
 			
-		hex.exit().remove();
-		hex.enter().append("path")
-			.attr("d", hexbin.hexagon(hexagonRadius))
-			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-		hex.style("fill", 
-			function(d) { 
-				var counts = [0,0,0,0];
-				d.forEach(function(p) {
-					counts[p[2]]++;
-				});
-				
-				return counts.reduce(function(p, c, i) { 
-					return d3.interpolateLab(p, colors[i])(c / d.length);
-				}, "white");
-			})
-			.style('fill-opacity', function(d) { return attenuation(d.length); });
-	}
-    
+		case VISTYPE.blending: // blending
+			var hexbins = hexbin(ptData);
+			attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
+			var hex = hexagon.selectAll("path")
+				.data(hexbins, function(d) { return d.i + "," + d.j });
 
-    
+			var colorBins = 8;
+			var lightnessScale = d3.scale.quantize()
+				.range(d3.range(colorBins).map(
+					d3.scale.linear()
+						.domain([0, colorBins-1])
+						.range(["#ffffff", "#000000"])
+						.interpolate(d3.interpolateLab)))
+				.domain(attenuation.domain());
+				
+			hex.exit().remove();
+			hex.enter().append("path")
+				.attr("d", hexbin.hexagon(hexagonRadius))
+				.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+			hex.style("fill", 
+				function(d) { 
+					var counts = [0,0,0,0];
+					d.forEach(function(p) {
+						counts[p[2]]++;
+					});
+					
+					return counts.reduce(function(p, c, i) { 
+						return d3.interpolateLab(p, colors[i])(c / d.length);
+					}, "white");
+				})
+				.style('fill-opacity', function(d) { return attenuation(d.length); });
+				
+				break;
+		// TODO: fill out all option
+		case VISTYPE.pt1:
+		case VISTYPE.pt2:
+		case VISTYPE.pt3:
+		case VISTYPE.pie1:
+		case VISTYPE.pie2:
+		case VISTYPE.weaving1:
+		case VISTYPE.weaving2:
+		case VISTYPE.texture:
+		default: // do nothing
+			break;
+	
+	}
+
      /*
     // try to move all points in binptsvg closer to center of their respective bins
     var pp = binpts_points.selectAll('g.binpts')
