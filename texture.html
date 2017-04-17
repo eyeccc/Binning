@@ -57,6 +57,7 @@ body {
 </select>
 </div>
 
+
 <body>
 
 <script src="https://d3js.org/d3.v3.min.js"></script>
@@ -67,42 +68,20 @@ body {
 
 var margins = {top: 20, right: 20, bottom: 40, left: 40};
 
-/*var thisClick = function(event) {
-    if (d3.event.defaultPrevented) return;
-    
-    var series = 0;
-    if (d3.event.ctrlKey) series = 2;
-    if (d3.event.altKey) series++;
-    
-    var point = d3.mouse(this);
-    var p = [point[0] - margins.left, point[1] - margins.top, series, ptId++];
-    
-    ptData.push(p);
-    updateVis();
-};*/
-//var selected = 0;
+
+// This part is update the vis (call updateVis)
 var dropdownChange = function() {
     var selectedIndex = d3.event.target.selectedIndex;
-	
     var selectedDOMElement =
         d3.event.target.children[selectedIndex];
     var selection = d3.select(selectedDOMElement);
     // I can get text by selection.text()
 	// Use selectedDOMElement.value to get option id
 	// Do sth
-	svgDefs2 = [svgDefs[selectedIndex]];
-	console.log("hi");
-	console.log(svgDefs2);
-	d3.select("body").selectAll('svg')
-    .data(svgDefs2).enter()
-    .append('svg')
-        .attr('id', function(d) { return d.name + "svg"; })
-        .attr('class', function(d) { return d.classes; })
-        .attr('width', width)
-        .attr('height', height); 
+	updateVis(selectedIndex);
 }
 
-
+// track event change (dropdown menu selection change)
 d3.select('#opts')
   .on('change',dropdownChange);
 
@@ -167,10 +146,12 @@ var svgDefs = [
         title: "Strokes"
     }
 ];
-var svgDefs2 = [svgDefs[0]];
+
+// weird test for only get the scatterplot svg
+//var svgDefs2 = [svgDefs[0]];
 
 d3.select("body").selectAll('svg')
-    .data(svgDefs2).enter()
+    .data(svgDefs).enter()
     .append('svg')
         .attr('id', function(d) { return d.name + "svg"; })
         .attr('class', function(d) { return d.classes; })
@@ -285,49 +266,65 @@ var hexagonRadius = 14.5;
 
 // <http://stackoverflow.com/questions/19911514/how-can-i-click-to-add-or-drag-in-d3>
 var ptData;
-var updateVis = function() {
-    var pts = points.selectAll('circle.point')
+var updateVis = function(selectedIndex) {
+    console.log(selectedIndex);
+	svgDefs3 = [svgDefs[selectedIndex]];
+	//d3.select("svg").remove();
+	d3.select("body").selectAll('svg')
+    .data(svgDefs3).enter()
+    .append('svg')
+        .attr('id', function(d) { return d.name + "svg"; })
+        .attr('class', function(d) { return d.classes; })
+        .attr('width', width)
+        .attr('height', height); 
+	
+    if (selectedIndex === 0) {
+		var pts = points.selectAll('circle.point')
         .data(ptData, function(d) { return d[3]; });
     
-    pts.exit().remove();
-    pts.enter().append('circle')
-        .attr("class", "point")
-        .attr('r', ptSize)
-        .attr('cx', function(e) { return e[0]; })
-        .attr('cy', function(e) { return e[1]; })
-        .style('fill', function(e) { return colors[e[2]]; });
+		pts.exit().remove();
+		pts.enter().append('circle')
+			.attr("class", "point")
+			.attr('r', ptSize)
+			.attr('cx', function(e) { return e[0]; })
+			.attr('cy', function(e) { return e[1]; })
+			.style('fill', function(e) { return colors[e[2]]; });
+	} else {
+		var hexbins = hexbin(ptData);
+		attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
+		var hex = hexagon.selectAll("path")
+			.data(hexbins, function(d) { return d.i + "," + d.j });
 
-    /*var hexbins = hexbin(ptData);
-    attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
-    var hex = hexagon.selectAll("path")
-        .data(hexbins, function(d) { return d.i + "," + d.j });
+		var colorBins = 8;
+		var lightnessScale = d3.scale.quantize()
+			.range(d3.range(colorBins).map(
+				d3.scale.linear()
+					.domain([0, colorBins-1])
+					.range(["#ffffff", "#000000"])
+					.interpolate(d3.interpolateLab)))
+			.domain(attenuation.domain());
+			
+		hex.exit().remove();
+		hex.enter().append("path")
+			.attr("d", hexbin.hexagon(hexagonRadius))
+			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+		hex.style("fill", 
+			function(d) { 
+				var counts = [0,0,0,0];
+				d.forEach(function(p) {
+					counts[p[2]]++;
+				});
+				
+				return counts.reduce(function(p, c, i) { 
+					return d3.interpolateLab(p, colors[i])(c / d.length);
+				}, "white");
+			})
+			.style('fill-opacity', function(d) { return attenuation(d.length); });
+	}
+    
 
-    var colorBins = 8;
-    var lightnessScale = d3.scale.quantize()
-        .range(d3.range(colorBins).map(
-            d3.scale.linear()
-                .domain([0, colorBins-1])
-                .range(["#ffffff", "#000000"])
-                .interpolate(d3.interpolateLab)))
-        .domain(attenuation.domain());
-        
-    hex.exit().remove();
-    hex.enter().append("path")
-        .attr("d", hexbin.hexagon(hexagonRadius))
-        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-    hex.style("fill", 
-        function(d) { 
-            var counts = [0,0,0,0];
-            d.forEach(function(p) {
-                counts[p[2]]++;
-            });
-            
-            return counts.reduce(function(p, c, i) { 
-                return d3.interpolateLab(p, colors[i])(c / d.length);
-            }, "white");
-        })
-        .style('fill-opacity', function(d) { return attenuation(d.length); });
-
+    
+     /*
     // try to move all points in binptsvg closer to center of their respective bins
     var pp = binpts_points.selectAll('g.binpts')
         .data(hexbins, function(d) { return d.i + "," + d.j; });
@@ -768,7 +765,8 @@ d3.csv("cluster-data.csv", function(d) {
     return [x1(+d.x), y1(+d.y), +d.category, ptId++]; 
   }, function(error, rows) {
     ptData = rows;
-    updateVis();  
+	//var selectedIndex = d3.event.target.selectedIndex;
+    updateVis(0);  
   }
 );
 
