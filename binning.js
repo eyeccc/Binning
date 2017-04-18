@@ -2,6 +2,7 @@
 // TODO: append selector from here
 
 
+
 var VISTYPE = {
   scatter: 0,
   blending: 1,
