@@ -254,7 +254,7 @@ var points = ptsvgs.append('g').attr('class', 'points')
     .attr('clip-path', 'url(#clip)');
 
 // TODO: need to change the class name
-var binptsvgs = d3.selectAll('svg.binpts > g');
+var binptsvgs = d3.selectAll('svg.pts > g');
 var binpts_points = binptsvgs.append('g').attr('class', 'points')
     .attr('clip-path', 'url(#clip)');
 
@@ -273,29 +273,8 @@ var hexagonRadius = 14.5; // TODO: need to be adjustable
 
 // <http://stackoverflow.com/questions/19911514/how-can-i-click-to-add-or-drag-in-d3>
 var ptData;
-var updateVis = function(selectedIndex) {
-    console.log(selectedIndex); // TODO: remove this log
-	// remove all hexagons
-	d3.selectAll(".hexagons  path").remove();
-	// remove all points from scatter plot
-	points.selectAll('circle.point').remove();
-
-    switch (selectedIndex) {
-		case VISTYPE.scatter: //scatterplot
-			var pts = points.selectAll('circle.point')
-			.data(ptData, function(d) { return d[3]; });
-		
-			pts.exit().remove();
-			pts.enter().append('circle')
-				.attr("class", "point")
-				.attr('r', ptSize)
-				.attr('cx', function(e) { return e[0]; })
-				.attr('cy', function(e) { return e[1]; })
-				.style('fill', function(e) { return colors[e[2]]; });
-			break;
-			
-		case VISTYPE.blending: // blending
-			var hexbins = hexbin(ptData);
+var hexbinFunc = function() {
+	var hexbins = hexbin(ptData);
 			attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
 			var hex = hexagon.selectAll("path")
 				.data(hexbins, function(d) { return d.i + "," + d.j });
@@ -325,29 +304,19 @@ var updateVis = function(selectedIndex) {
 					}, "white");
 				})
 				.style('fill-opacity', function(d) { return attenuation(d.length); });
-				
-				break;
-		// TODO: fill out all option
-		case VISTYPE.pt1:
-		case VISTYPE.pt2:
-		case VISTYPE.pt3:
-		case VISTYPE.pie1:
-		case VISTYPE.pie2:
-		case VISTYPE.weaving1:
-		case VISTYPE.weaving2:
-		case VISTYPE.texture:
-		default: // do nothing
-			break;
-	
-	}
 
-     /*
-    // try to move all points in binptsvg closer to center of their respective bins
-    var pp = binpts_points.selectAll('g.binpts')
+}
+
+var ptglyphFunc = function(visType) {
+	console.log("test");
+	console.log(visType);
+	// try to move all points in binptsvg closer to center of their respective bins
+	var hexbins = hexbin(ptData);
+    var pp = binpts_points.selectAll('g.pts')
         .data(hexbins, function(d) { return d.i + "," + d.j; });
     pp.exit().remove();
     var newbin = pp.enter().append('g')
-        .attr('class', 'binpts')
+        .attr('class', 'pts')
         .attr('id', function(d) { return d.i + "," + d.j});
 
     var newpp = pp.selectAll('circle.point')
@@ -381,8 +350,10 @@ var updateVis = function(selectedIndex) {
                 .attr('cy', binCenter[1] + newPos[1]);
         }
     });
-
-    // diverge here, remove baesd on # points, or # classes
+	
+	//------------------------ Everything looks good until here!-----------------------------
+	
+	// diverge here, remove baesd on # points, or # classes
     binpts_points.each(function(d, i) {
         var thisSVG = d3.select(this);
         var thisID = d3.select(thisSVG.node().parentNode.parentNode).attr('id');
@@ -396,7 +367,7 @@ var updateVis = function(selectedIndex) {
         })
 
         var ptThreshold = 7;
-        if (thisID === 'binclasssvg' || thisID == 'binoutliersvg') {
+        if (visType === VISTYPE.pt2 || visType == VISTYPE.pt3) {
             // try to select one of each class
             thisPoints.forEach(function(binData, binID) {
                 var binPts = d3.selectAll(binData);
@@ -462,7 +433,7 @@ var updateVis = function(selectedIndex) {
 
             // identify points that are single outliers and replace them with crosses
             var cross = d3.svg.symbol().type("triangle-up").size(10);
-            if (thisID == 'binoutliersvg') {
+            if (visType === VISTYPE.pt3) {
                 thisPoints.filter(function(d) { return !!d.isOutlier; }).forEach(function(grpOutliers) {
                     theseOutliers = d3.selectAll(grpOutliers).each(function(d) {
                         var thisPt = d3.select(this);
@@ -478,7 +449,7 @@ var updateVis = function(selectedIndex) {
                 });
             }
 
-        } else if (thisID === 'binptsvg') {
+        } else if (visType === VISTYPE.pt1) {
             // subsample.  just flag points, then remove all that conflict
             thisPoints.forEach(function(binData, binID) {
                 var order = shuffle(d3.range(binData.length));
@@ -503,6 +474,65 @@ var updateVis = function(selectedIndex) {
         } else 
             throw "unimplemented subsampling routing for svg#" + thisID;
     });
+}
+
+var updateVis = function(selectedIndex) {
+    console.log(selectedIndex); // TODO: remove this log
+	
+	// TODO: It is better to do state change detection here, 
+	// so we don't need to redraw everytime we change the dropdown list
+	
+	// remove all hexagons
+	d3.selectAll(".hexagons  path").remove();
+	// remove all points from scatter plot
+	points.selectAll('circle.point').remove();
+	// remove all bin points
+	binpts_points.selectAll('circle.point').remove();
+
+    switch (selectedIndex) {
+		case VISTYPE.scatter: //scatterplot
+			var pts = points.selectAll('circle.point')
+			.data(ptData, function(d) { return d[3]; });
+		
+			pts.exit().remove();
+			pts.enter().append('circle')
+				.attr("class", "point")
+				.attr('r', ptSize)
+				.attr('cx', function(e) { return e[0]; })
+				.attr('cy', function(e) { return e[1]; })
+				.style('fill', function(e) { return colors[e[2]]; });
+			break;
+			
+		case VISTYPE.blending: // blending
+			hexbinFunc();
+			break;
+		// TODO: fill out all option
+		case VISTYPE.pt1:
+			hexbinFunc();
+			ptglyphFunc(VISTYPE.pt1);
+			break;
+		case VISTYPE.pt2:
+			hexbinFunc(VISTYPE.pt2);
+			break;
+		case VISTYPE.pt3:
+			hexbinFunc(VISTYPE.pt3);
+			break;
+		
+		
+		case VISTYPE.pie1:
+		case VISTYPE.pie2:
+		case VISTYPE.weaving1:
+		case VISTYPE.weaving2:
+		case VISTYPE.texture:
+		default: // do nothing
+			break;
+	
+	}
+
+     /*
+    
+
+    
 
     
     // deal with pies
