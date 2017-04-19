@@ -1,7 +1,4 @@
 // TODO: let people download image easily
-// TODO: append selector from here
-
-
 
 var VISTYPE = {
   scatter: 0,
@@ -54,176 +51,6 @@ d3.select('#myRange')
 	.on('change',dropdownChange);
 
 
-    
-// adjust this according to the dataset
-var xd = [0, 10];
-var yd = [0, 10];
-
-var colors = d3.scale.category10().range().slice(0, 4); 
-// TODO: make color category dynamic according to dataset
-// TODO: show color mapping to class name on the side according to dataset
-
-var svgDefs = [
-	{
-        name: "scatter",
-        classes: "pts"
-    }/*,
-    {
-        name: "bin",
-        classes: "hexbin",
-        title: "Weighted Average Binning"
-    },
-    {
-        name: "binpt",
-        classes: "hexbin binpts",
-        title: "Exemplar pts (picked randomly)"
-    },
-    {
-        name: "binclass",
-        classes: "hexbin binpts",
-        title: "Exemplar pts (at least one of each class)"
-    },
-    {
-        name: "binoutlier",
-        classes: "hexbin binpts",
-        title: "Exemplar pts (explicit outliers as ?)"
-    },
-    {
-        name: "binpie",
-        classes: "hexbin binpies",
-        title: "Binning with pies"
-    },
-    {
-        name: "binpiesize",
-        classes: "binpies",
-        title: "Pie glyphs (size = number)"
-    },
-    {
-        name: "weaving",
-        classes: "hexbin weaving canvasOverlay",
-        title: "Color weaving"
-    },
-    {
-        name: "weaving-prop",
-        classes: "hexbin weaving canvasOverlay",
-        title: "Color weaving in proportion"
-    },
-    {
-        name: "textures",
-        classes: "hexbin texture",
-        title: "Strokes"
-    }*/
-];
-
-// weird test for only get the scatterplot svg
-//var svgDefs2 = [svgDefs[0]];
-
-d3.select("body").selectAll('svg')
-    .data(svgDefs).enter()
-    .append('svg')
-        .attr('id', function(d) { return d.name + "svg"; })
-        .attr('class', function(d) { return d.classes; })
-        .attr('width', width)
-        .attr('height', height); 
-
-// add a canvas element behind any elements that request them
-d3.selectAll("svg.pts").each(function() {
-    var thisSVG = d3.select(this);
-    var thisID = thisSVG.attr('id');
-    var thisPrefix = thisID.split("svg")[0];
-
-    var thisContainer = d3.select("body").insert("div", "#" + thisID)
-        .attr("id", thisPrefix + "-container")
-        .attr('class', 'canvasContainer')
-        .style('width', width + "px"); // have to define a width for this to be a placeable div
-    
-    // add the svg
-    thisSVG.remove();
-    thisContainer.append(function() {
-        return thisSVG.node();
-    });
-
-    // then append a canvas element
-    thisContainer.append('canvas')
-        .attr('width', width - margins.left - margins.right)
-        .attr('height', height - margins.top - margins.bottom)
-        .style('top', margins.top + "px")
-        .style('left', margins.left + "px");
-});
-
-// add click interaction to the scatterplot svg
-// d3.select("#scattersvg").on('click', thisClick);
-
-width = d3.select("svg").attr('width') - margins.left - margins.right;
-height = d3.select("svg").attr('height') - margins.top - margins.bottom;
-
-var x1 = d3.scale.linear()
-    .domain(xd)
-    .range([0, width]);
-    
-var y1 = d3.scale.linear()
-    .domain(yd)
-    .range([height, 0]);
-
-
-
-
-var pie = d3.layout.pie()
-    .sort(d3.descending);
-
-var arc = d3.svg.arc()
-    .outerRadius(8)
-    .innerRadius(0);
-
-svg = d3.selectAll('svg').append('g')
-    .attr("transform", "translate(" + margins.left + ", " + margins.top + ")");	
-    
-svg.append('g')
-    .attr('class', 'xaxis axis')
-    .attr('transform', 'translate(0,' + height + ')')
-    .call(d3.svg.axis().orient('bottom').scale(x1));
-    
-svg.append('g')
-    .attr('class', 'yaxis axis')
-    .call(d3.svg.axis().orient("left").scale(y1));
-
-// only do this for hexsvgs
-var hexsvgs = d3.selectAll('svg.pts > g');
-hexsvgs.append('clipPath')
-    .attr('id', 'clip')
-  .append('rect')
-    .attr('class', 'mesh')
-    .attr('width', width)
-    .attr('height', height);
-
-var hexagon = hexsvgs.append("g")
-    .attr('clip-path', 'url(#clip)')
-    .attr("class", "hexagons");
-
-// only do this for ptsvgs
-var ptsvgs = d3.selectAll('svg.pts > g');
-var points = ptsvgs.append('g').attr('class', 'points')
-    .attr('clip-path', 'url(#clip)');
-
-var binptsvgs = d3.selectAll('svg.pts > g');
-var binpts_points = binptsvgs.append('g').attr('class', 'points')
-    .attr('clip-path', 'url(#clip)');
-
-var binpie_pies = d3.selectAll('svg.pts > g')
-    .append('g').attr('class', 'pts')
-    .attr('clip-path', 'url(#clip)');
-
-var bin_lines = d3.selectAll('svg.pts > g')
-    .append('g').attr('class', 'lines')
-    .attr('clip-path', 'url(#clip)');
-
-var attenuation = d3.scale.log().range([0,1]);
-
-var ptSize = 3;
-//var hexagonRadius = 14.5; // TODO: need to be adjustable
-
-// <http://stackoverflow.com/questions/19911514/how-can-i-click-to-add-or-drag-in-d3>
-var ptData;
 var hexbinFunc = function(visType = -1) {
 	var hexbins = hexbin(ptData);
 			attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
@@ -443,7 +270,7 @@ var binpieFunc = function(visType) {
         .attr('transform', function(d) { return 'translate(' + d.x + "," + d.y + ")"});
     
     var pieScale = d3.scale.pow().exponent(2)
-        .range([4, 13])
+        .range([4, binRad - 2])
         .domain(d3.extent(d3.selectAll(pp[0]).data().map(function(d) { return d.length; })));
 
     pp.each(function(binPts) {
@@ -464,7 +291,7 @@ var binpieFunc = function(visType) {
             else 
                 p[thisClass]++;
             return p;
-        }, Array(4).fill(0));
+        }, Array(classNum).fill(0));
 
         thisPie.selectAll('.arc').remove();
         var arcs = thisPie.selectAll('.arc')
@@ -603,16 +430,16 @@ var textureFunc = function() {
             thiscount = thishex.reduce(
                 function(p, d) { 
                     p[d[2]]++; return p;
-                }, Array(4).fill(0));
+                }, Array(classNum).fill(0));
             return p.map(function(d, i) {
                 return d > thiscount[i] ? d : thiscount[i];
             });
-        }, Array(4).fill(0));
+        }, Array(classNum).fill(0));
         
         var freq = d3.scale.quantize()
             .domain([0, d3.max(maxClass)])
             .range(d3.range(1,12)); // bin the numerosity into 12 categories
-        var angles = d3.range(0, Math.PI, Math.PI / 4);
+        var angles = d3.range(0, Math.PI, Math.PI / classNum);
 
 
         var ll = bin_lines.selectAll('g.binlines')
@@ -799,15 +626,159 @@ var updateVis = function(selectedIndex) {
 	}
 };
 
+
+    
+// adjust this according to the dataset
+var xd = [0, 10];
+var yd = [0, 10];
+
+var classNum = 4;
+var colors = d3.scale.category10().range().slice(0, classNum); 
+// TODO: make color category dynamic according to dataset
+// TODO: show color mapping to class name on the side according to dataset
+
+var svgDefs = [
+	{
+        name: "scatter",
+        classes: "pts"
+    }
+];
+
+d3.select("body").selectAll('svg')
+    .data(svgDefs).enter()
+    .append('svg')
+        .attr('id', function(d) { return d.name + "svg"; })
+        .attr('class', function(d) { return d.classes; })
+        .attr('width', width)
+        .attr('height', height); 
+
+// add a canvas element behind any elements that request them
+d3.selectAll("svg.pts").each(function() {
+    var thisSVG = d3.select(this);
+    var thisID = thisSVG.attr('id');
+    var thisPrefix = thisID.split("svg")[0];
+
+    var thisContainer = d3.select("body").insert("div", "#" + thisID)
+        .attr("id", thisPrefix + "-container")
+        .attr('class', 'canvasContainer')
+        .style('width', width + "px"); // have to define a width for this to be a placeable div
+    
+    // add the svg
+    thisSVG.remove();
+    thisContainer.append(function() {
+        return thisSVG.node();
+    });
+
+    // then append a canvas element
+    thisContainer.append('canvas')
+        .attr('width', width - margins.left - margins.right)
+        .attr('height', height - margins.top - margins.bottom)
+        .style('top', margins.top + "px")
+        .style('left', margins.left + "px");
+});
+
+// add click interaction to the scatterplot svg
+// d3.select("#scattersvg").on('click', thisClick);
+
+width = d3.select("svg").attr('width') - margins.left - margins.right;
+height = d3.select("svg").attr('height') - margins.top - margins.bottom;
+
+var x1 = d3.scale.linear()
+    .domain(xd)
+    .range([0, width]);
+    
+var y1 = d3.scale.linear()
+    .domain(yd)
+    .range([height, 0]);
+
+var pie = d3.layout.pie()
+    .sort(d3.descending);
+
+var arc = d3.svg.arc()
+    .outerRadius(8)
+    .innerRadius(0);
+
+svg = d3.selectAll('svg').append('g')
+    .attr("transform", "translate(" + margins.left + ", " + margins.top + ")");	
+    
+svg.append('g')
+    .attr('class', 'xaxis axis')
+    .attr('transform', 'translate(0,' + height + ')')
+    .call(d3.svg.axis().orient('bottom').scale(x1));
+    
+svg.append('g')
+    .attr('class', 'yaxis axis')
+    .call(d3.svg.axis().orient("left").scale(y1));
+
+// only do this for hexsvgs
+var hexsvgs = d3.selectAll('svg.pts > g');
+hexsvgs.append('clipPath')
+    .attr('id', 'clip')
+  .append('rect')
+    .attr('class', 'mesh')
+    .attr('width', width)
+    .attr('height', height);
+
+var hexagon = hexsvgs.append("g")
+    .attr('clip-path', 'url(#clip)')
+    .attr("class", "hexagons");
+
+// only do this for ptsvgs
+var ptsvgs = d3.selectAll('svg.pts > g');
+var points = ptsvgs.append('g').attr('class', 'points')
+    .attr('clip-path', 'url(#clip)');
+
+var binptsvgs = d3.selectAll('svg.pts > g');
+var binpts_points = binptsvgs.append('g').attr('class', 'points')
+    .attr('clip-path', 'url(#clip)');
+
+var binpie_pies = d3.selectAll('svg.pts > g')
+    .append('g').attr('class', 'pts')
+    .attr('clip-path', 'url(#clip)');
+
+var bin_lines = d3.selectAll('svg.pts > g')
+    .append('g').attr('class', 'lines')
+    .attr('clip-path', 'url(#clip)');
+
+var attenuation = d3.scale.log().range([0,1]);
+
+var ptSize = 3;
+//var hexagonRadius = 14.5; // TODO: need to be adjustable
+
+// <http://stackoverflow.com/questions/19911514/how-can-i-click-to-add-or-drag-in-d3>
+var ptData;
 var ptId = 0;
-d3.csv("cluster-data.csv", function(d) { 
+var filename = "cluster-data.csv";
+var getFileName = function() {
+	filename = document.getElementById("file").value;
+	// TODO: require getting full path length
+	draw(filename);
+}
+
+var draw  = function(data_src) {
+	console.log(data_src);
+	// reset old dataset
+	ptData = []; 
+	ptId = 0;
+	
+	d3.csv(data_src, function(d) { 
     return [x1(+d.x), y1(+d.y), +d.category, ptId++]; 
   }, function(error, rows) {
     ptData = rows;
-	//var selectedIndex = d3.event.target.selectedIndex;
-    updateVis(0);  
+	// TODO: find min and max in the dataset to reset the domain of the vis
+	// TODO: count number of classes in the dataset to change color setting
+	console.log(error);
+	var e = document.getElementById("opts");
+    var selectedIndex = e.selectedIndex;
+
+    updateVis(selectedIndex);  
   }
 );
+
+}
+
+draw(filename);
+
 
 function eucliDist(pt1, pt2) {
     return Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
