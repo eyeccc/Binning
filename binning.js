@@ -709,6 +709,8 @@ svg.append('g')
 svg.append('g')
     .attr('class', 'yaxis axis')
     .call(d3.svg.axis().orient("left").scale(y1));
+	
+
 
 // only do this for hexsvgs
 var hexsvgs = d3.selectAll('svg.pts > g');
@@ -743,7 +745,6 @@ var bin_lines = d3.selectAll('svg.pts > g')
 var attenuation = d3.scale.log().range([0,1]);
 
 var ptSize = 3;
-//var hexagonRadius = 14.5; // TODO: need to be adjustable
 
 // <http://stackoverflow.com/questions/19911514/how-can-i-click-to-add-or-drag-in-d3>
 var ptData;
@@ -755,6 +756,12 @@ var getFileName = function() {
 	draw(filename);
 }
 
+var getDistintValue = function() {
+
+}
+
+var xmax;
+
 var draw  = function(data_src) {
 	console.log(data_src);
 	// reset old dataset
@@ -762,18 +769,20 @@ var draw  = function(data_src) {
 	ptId = 0;
 	
 	d3.csv(data_src, function(d) { 
-    return [x1(+d.x), y1(+d.y), +d.category, ptId++]; 
-  }, function(error, rows) {
-    ptData = rows;
-	// TODO: find min and max in the dataset to reset the domain of the vis
-	// TODO: count number of classes in the dataset to change color setting
-	console.log(error);
-	var e = document.getElementById("opts");
-    var selectedIndex = e.selectedIndex;
-
-    updateVis(selectedIndex);  
-  }
-);
+		
+		return [x1(+d.x), y1(+d.y), +d.category, ptId++]; 
+	  }, function(error, rows) {
+		ptData = rows;
+		// TODO: find min and max in the dataset to reset the domain of the vis
+		// TODO: count number of classes in the dataset to change color setting
+		// console.log(error);
+		
+		
+		var e = document.getElementById("opts");
+		var selectedIndex = e.selectedIndex;
+		updateVis(selectedIndex);  
+	  }
+	);
 
 }
 
@@ -797,4 +806,22 @@ function shuffle(arr) {
 
     return arr;
 };
+
+/*$(function() { 
+    $("#btnSave").click(function() { 
+        html2canvas($("#scatter-container"), {
+            onrendered: function(canvas) {
+			console.log("pnggg");
+                theCanvas = canvas;
+                document.body.appendChild(canvas);
+
+                // Convert and download as image 
+                Canvas2Image.saveAsPNG(canvas); 
+                $("#img-out").append(canvas);
+                // Clean up 
+                //document.body.removeChild(canvas);
+            }
+        });
+    });
+});*/
     
