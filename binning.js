@@ -701,14 +701,7 @@ var arc = d3.svg.arc()
 svg = d3.selectAll('svg').append('g')
     .attr("transform", "translate(" + margins.left + ", " + margins.top + ")");	
     
-svg.append('g')
-    .attr('class', 'xaxis axis')
-    .attr('transform', 'translate(0,' + height + ')')
-    .call(d3.svg.axis().orient('bottom').scale(x1));
-    
-svg.append('g')
-    .attr('class', 'yaxis axis')
-    .call(d3.svg.axis().orient("left").scale(y1));
+
 	
 
 
@@ -756,11 +749,10 @@ var getFileName = function() {
 	draw(filename);
 }
 
-var getDistintValue = function() {
-
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
 }
 
-var xmax;
 
 var draw  = function(data_src) {
 	console.log(data_src);
@@ -769,13 +761,62 @@ var draw  = function(data_src) {
 	ptId = 0;
 	
 	d3.csv(data_src, function(d) { 
+		//classNum = d3.map(d, function(data) { return data.category; }).size() + 1;
 		
-		return [x1(+d.x), y1(+d.y), +d.category, ptId++]; 
+		return [+d.x, +d.y, +d.category, ptId++]; 
 	  }, function(error, rows) {
-		ptData = rows;
-		// TODO: find min and max in the dataset to reset the domain of the vis
+		
+		
 		// TODO: count number of classes in the dataset to change color setting
 		// console.log(error);
+		
+		// TODO: find min and max in the dataset to reset the domain of the vis
+		var xmin = Math.min.apply(Math, rows.map(function(v) {
+		  return v[0];
+		}));
+		var xmax = Math.max.apply(Math, rows.map(function(v) {
+		  return v[0];
+		}));
+		var ymin = Math.min.apply(Math, rows.map(function(v) {
+		  return v[1];
+		}));
+		var ymax = Math.max.apply(Math, rows.map(function(v) {
+		  return v[1];
+		}));
+		
+		// This part is not very efficient though
+		var cat = rows.map(function(v){return v[2];});
+		classNum = cat.filter(onlyUnique).length;
+		colors = d3.scale.category10().range().slice(0, classNum); 
+		
+		xd = [Math.floor(xmin), Math.ceil(xmax)];
+		yd = [Math.floor(ymin), Math.ceil(ymax)];
+		x1 = d3.scale.linear()
+			.domain(xd)
+			.range([0, width]);
+			
+		y1 = d3.scale.linear()
+			.domain(yd)
+			.range([height, 0]);
+		
+		// clean up old scale
+		d3.selectAll('.tick').remove();
+		
+		svg.append('g')
+			.attr('class', 'xaxis axis')
+			.attr('transform', 'translate(0,' + height + ')')
+			.call(d3.svg.axis().orient('bottom').scale(x1));
+			
+		svg.append('g')
+			.attr('class', 'yaxis axis')
+			.call(d3.svg.axis().orient("left").scale(y1));
+			
+		rows = rows.map(function(v){
+			return [x1(v[0]), y1(v[1]), v[2], v[3]];
+		});
+		
+		
+		ptData = rows;
 		
 		
 		var e = document.getElementById("opts");
