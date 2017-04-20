@@ -1,4 +1,5 @@
 // TODO: let people download image easily
+// TODO: might be better to draw scatterplot in webgl for rendering speed?
 
 var VISTYPE = {
   scatter: 0,
@@ -321,6 +322,7 @@ var binpieFunc = function(visType) {
 
 }
 
+// TODO: there is something wrong for weaving rendering
 var weavingFunc = function(visType) {
 	// deal with weaving
     //d3.selectAll(".hexagon > path").style("fill-opacity", 0);
@@ -661,7 +663,8 @@ d3.selectAll("svg.pts").each(function() {
     var thisContainer = d3.select("body").insert("div", "#" + thisID)
         .attr("id", thisPrefix + "-container")
         .attr('class', 'canvasContainer')
-        .style('width', width + "px"); // have to define a width for this to be a placeable div
+        .style('width', width + "px") // have to define a width for this to be a placeable div
+		.style('height', height + "px");
     
     // add the svg
     thisSVG.remove();
@@ -753,7 +756,7 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
-
+var obj_mapping = {};
 var draw  = function(data_src) {
 	console.log(data_src);
 	// reset old dataset
@@ -761,16 +764,12 @@ var draw  = function(data_src) {
 	ptId = 0;
 	
 	d3.csv(data_src, function(d) { 
-		//classNum = d3.map(d, function(data) { return data.category; }).size() + 1;
+		// need to make category be string not number
 		
-		return [+d.x, +d.y, +d.category, ptId++]; 
+		return [+d.x, +d.y, d.category, ptId++]; 
 	  }, function(error, rows) {
 		
-		
-		// TODO: count number of classes in the dataset to change color setting
-		// console.log(error);
-		
-		// TODO: find min and max in the dataset to reset the domain of the vis
+		// find min and max in the dataset to reset the domain of the vis
 		var xmin = Math.min.apply(Math, rows.map(function(v) {
 		  return v[0];
 		}));
@@ -785,9 +784,42 @@ var draw  = function(data_src) {
 		}));
 		
 		// This part is not very efficient though
+		// count number of classes in the dataset to change color setting
 		var cat = rows.map(function(v){return v[2];});
-		classNum = cat.filter(onlyUnique).length;
+		var uniqueClass = cat.filter(onlyUnique);
+		classNum = uniqueClass.length;
 		colors = d3.scale.category10().range().slice(0, classNum); 
+		
+		
+		for (var i = 0; i < classNum; i++) {
+			obj_mapping[uniqueClass[i]] = i;
+		}
+		d3.selectAll('.label').remove();
+		// this part is for color mapping information
+		var newsvg = 
+			d3.select('body')
+				.append('svg')
+				.attr('class', 'label')
+				.attr('width', '600px')
+				.attr('height', '100px');
+				
+		// i should not use for loop...
+		for(var i = 0; i < classNum; i++) {
+			newsvg.append('rect')
+					.attr('class', 'label')
+					.attr('x', i*100+ 100)
+					.attr('width', '20px')
+					.attr('height', '20px')
+					.attr('fill', colors[i]);
+			newsvg.append('text')
+						.attr('class', 'label')
+						.attr('x', i*100+ 130)
+						.attr('y', 15)
+						.style('fill', 'black')
+						.text(uniqueClass[i]);
+					
+		}
+				
 		
 		xd = [Math.floor(xmin), Math.ceil(xmax)];
 		yd = [Math.floor(ymin), Math.ceil(ymax)];
@@ -810,15 +842,20 @@ var draw  = function(data_src) {
 		svg.append('g')
 			.attr('class', 'yaxis axis')
 			.call(d3.svg.axis().orient("left").scale(y1));
-			
+		
+		var lables = svg.append('g')
+			.attr('class', 'labels')
+			.attr('transform', 'translate(500,500)');
+		
+		
+		// transform data points to the position on display
 		rows = rows.map(function(v){
-			return [x1(v[0]), y1(v[1]), v[2], v[3]];
+			return [x1(v[0]), y1(v[1]), obj_mapping[v[2]], v[3]];
 		});
-		
-		
+
 		ptData = rows;
-		
-		
+
+		// keep the previous design selection when changing to another dataset
 		var e = document.getElementById("opts");
 		var selectedIndex = e.selectedIndex;
 		updateVis(selectedIndex);  
@@ -827,8 +864,8 @@ var draw  = function(data_src) {
 
 }
 
+// initial drawing
 draw(filename);
-
 
 function eucliDist(pt1, pt2) {
     return Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
@@ -848,9 +885,11 @@ function shuffle(arr) {
     return arr;
 };
 
+// For saving image of design
+// this does not catch the correct stuff
 /*$(function() { 
     $("#btnSave").click(function() { 
-        html2canvas($("#scatter-container"), {
+        html2canvas($("#scattersvg"), {
             onrendered: function(canvas) {
 			console.log("pnggg");
                 theCanvas = canvas;
