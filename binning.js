@@ -1,5 +1,6 @@
 // TODO: let people download image easily
 // TODO: might be better to draw scatterplot in webgl for rendering speed?
+// TODO: make a draw function that people can pull out and put in their application
 
 var VISTYPE = {
   scatter: 0,
