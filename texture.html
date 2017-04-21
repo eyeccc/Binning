@@ -63,11 +63,10 @@ h1 {
 </div>
 <div>Adjust your bin size<input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
 <h2>Notice: This application works best for datasets with less than 10 classes.</h2>
-<div><input type="button" id="btnSave" value="Save PNG"/>TODO functionality.</div>
+<div><input type="button" id="btnSave" value="print or save as PDF" onClick="window.print()"/></div>
 <body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-<script src="canvas2image.js"></script>
-<script src="html2canvas.js"></script>
+
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <!--<script src="textures.min.js"></script>-->
 <script src="d3.hexbin.min.js"></script>

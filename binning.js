@@ -886,23 +886,5 @@ function shuffle(arr) {
     return arr;
 };
 
-// For saving image of design
-// this does not catch the correct stuff
-/*$(function() { 
-    $("#btnSave").click(function() { 
-        html2canvas($("#scattersvg"), {
-            onrendered: function(canvas) {
-			console.log("pnggg");
-                theCanvas = canvas;
-                document.body.appendChild(canvas);
 
-                // Convert and download as image 
-                Canvas2Image.saveAsPNG(canvas); 
-                $("#img-out").append(canvas);
-                // Clean up 
-                //document.body.removeChild(canvas);
-            }
-        });
-    });
-});*/
     
