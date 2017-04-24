@@ -16,6 +16,7 @@ var VISTYPE = {
 };
 var margins = {top: 20, right: 20, bottom: 40, left: 40};
 var binRad = 15;
+var ptData = [];
 
 /** adjust these number later ***/
 var width = 600,
@@ -24,7 +25,8 @@ var width = 600,
 var hexbin = d3.hexbin()
     .size([width,height])
     .radius(binRad);
-
+	// hexbin.radius(new)
+var hexbins = hexbin(ptData);
 // This part is update the vis (call updateVis)
 // DEBUG: cannot get correct state for vis type after adding dynamic slide for bin size
 
@@ -43,6 +45,7 @@ var dropdownChange = function() {
 	hexbin = d3.hexbin()
     .size([width,height])
     .radius(binRad);
+	hexbins = hexbin(ptData);
 	updateVis(selectedIndex);
 }
 
@@ -54,7 +57,6 @@ d3.select('#myRange')
 
 
 var hexbinFunc = function(visType = -1) {
-	var hexbins = hexbin(ptData);
 			attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
 			var hex = hexagon.selectAll("path")
 				.data(hexbins, function(d) { return d.i + "," + d.j });
@@ -97,7 +99,7 @@ var hexbinFunc = function(visType = -1) {
 
 var ptglyphFunc = function(visType) {
 	// try to move all points in binptsvg closer to center of their respective bins
-	var hexbins = hexbin(ptData);
+	//var hexbins = hexbin(ptData);
     var pp = binpts_points.selectAll('g.pts')
         .data(hexbins, function(d) { return d.i + "," + d.j; });
     pp.exit().remove();
@@ -262,7 +264,7 @@ var ptglyphFunc = function(visType) {
 
 var binpieFunc = function(visType) {
 	 // deal with pies
-	var hexbins = hexbin(ptData);
+	//var hexbins = hexbin(ptData);
     var pp = binpie_pies.selectAll('g.pts')
         .data(hexbins, function(d) { return d.i + "," + d.j; })
     pp.exit().remove();
@@ -343,7 +345,7 @@ var weavingFunc = function(visType) {
         }) 
 
         // now, go through each bin, figure out the proportions, then fill in the hexagon
-		var hexbins = hexbin(ptData);
+		//var hexbins = hexbin(ptData);
 		//attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
         hexbins.forEach(function(binPts) {
             // save original transformation (identity)
@@ -410,15 +412,20 @@ var weavingFunc = function(visType) {
 
 var textureFunc = function() {
 	// deal with textures (try to be smart about line orientation?)
-	var hexbins = hexbin(ptData);
+	//var hexbins = hexbin(ptData);
 
     d3.selectAll("svg.pts").each(function() {
         var thisCanvas = d3.select(this);
-        thisCanvas.selectAll("clipPath#hex")
-            .data([0]).enter().append('clipPath')
+        var test = thisCanvas.selectAll("clipPath#hex")
+            .data([0]);
+			
+		test.enter().append('clipPath')
                 .attr('id', 'hex')
                     .append('path')
                     .attr('d', d3.hexbin().radius(binRad).hexagon()); 
+					
+		test.select("clipPath#hex path")
+			.attr('d', d3.hexbin().radius(binRad).hexagon());
 		// TODO: fix this part!!!
 
         // blank out background colors
@@ -459,7 +466,7 @@ var textureFunc = function() {
             var thiscount = thishex.reduce(
                 function(p, d) { 
                     p[d[2]]++; return p;
-                }, Array(4).fill(0));
+                }, Array(classNum).fill(0));
 
             var linegrp = thisbin.selectAll('g.linegrp')
                 .data(thiscount);
@@ -475,7 +482,7 @@ var textureFunc = function() {
                 var y = ( (binRad - 0.5) ) * Math.cos(angles[i]);
 
                 var numFreq = freq(count);
-                var stepSize =  (binRad - 0.5) / numFreq;
+                var stepSize =  (binRad * 2*  Math.cos(15)) / numFreq;
 				//console.log("stepSize");
 				//console.log(stepSize);
                 var startAtZero = numFreq % 2 == 1;
@@ -681,9 +688,6 @@ d3.selectAll("svg.pts").each(function() {
         .style('left', margins.left + "px");
 });
 
-// add click interaction to the scatterplot svg
-// d3.select("#scattersvg").on('click', thisClick);
-
 width = d3.select("svg").attr('width') - margins.left - margins.right;
 height = d3.select("svg").attr('height') - margins.top - margins.bottom;
 
@@ -704,12 +708,7 @@ var arc = d3.svg.arc()
 
 svg = d3.selectAll('svg').append('g')
     .attr("transform", "translate(" + margins.left + ", " + margins.top + ")");	
-    
 
-	
-
-
-// only do this for hexsvgs
 var hexsvgs = d3.selectAll('svg.pts > g');
 hexsvgs.append('clipPath')
     .attr('id', 'clip')
@@ -722,7 +721,6 @@ var hexagon = hexsvgs.append("g")
     .attr('clip-path', 'url(#clip)')
     .attr("class", "hexagons");
 
-// only do this for ptsvgs
 var ptsvgs = d3.selectAll('svg.pts > g');
 var points = ptsvgs.append('g').attr('class', 'points')
     .attr('clip-path', 'url(#clip)');
@@ -743,8 +741,7 @@ var attenuation = d3.scale.log().range([0,1]);
 
 var ptSize = 3;
 
-// <http://stackoverflow.com/questions/19911514/how-can-i-click-to-add-or-drag-in-d3>
-var ptData;
+
 var ptId = 0;
 var filename = "cluster-data.csv";
 var getFileName = function() {
@@ -758,7 +755,7 @@ function onlyUnique(value, index, self) {
 }
 
 var obj_mapping = {};
-var draw  = function(data_src) {
+var draw  = function(data_src = "cluster-data.csv") {
 	console.log(data_src);
 	// reset old dataset
 	ptData = []; 
