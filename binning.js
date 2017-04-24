@@ -92,6 +92,7 @@ var hexbinFunc = function(visType = -1) {
 
 var ptglyphFunc = function(visType) {
 	// try to move all points in binptsvg closer to center of their respective bins
+	hexbinFunc();
     var pp = binpts_points.selectAll('g.pts')
         .data(hexbins, function(d) { return d.i + "," + d.j; });
     pp.exit().remove();
@@ -256,6 +257,10 @@ var ptglyphFunc = function(visType) {
 
 var binpieFunc = function(visType) {
 	 // deal with pies
+	 if(visType == VISTYPE.pie1) {
+		hexbinFunc();
+	 }
+	 
     var pp = binpie_pies.selectAll('g.pts')
         .data(hexbins, function(d) { return d.i + "," + d.j; })
     pp.exit().remove();
@@ -306,7 +311,10 @@ var binpieFunc = function(visType) {
 // TODO: there is something wrong for weaving rendering
 var weavingFunc = function(visType) {
 	// deal with weaving
-
+	if (visType == VISTYPE.weaving2) {
+		hexbinFunc();
+	}
+	
     d3.selectAll("svg.pts + canvas").each(function() {
         var thisCanvas = d3.select(this);
         var thisID = d3.select(thisCanvas.node().parentNode).select("svg").attr('id');
@@ -389,6 +397,7 @@ var weavingFunc = function(visType) {
 
 var textureFunc = function() {
 	// deal with textures (try to be smart about line orientation?)
+	hexbinFunc();
     d3.selectAll("svg.pts").each(function() {
         var thisCanvas = d3.select(this);
         var test = thisCanvas.selectAll("clipPath#hex")
@@ -531,21 +540,16 @@ var updateVis = function(selectedIndex) {
 		case VISTYPE.blending: // blending
 			hexbinFunc();
 			break;
-		// TODO: fill out all option
 		case VISTYPE.pt1:
-			hexbinFunc();
 			ptglyphFunc(VISTYPE.pt1);
 			break;
 		case VISTYPE.pt2:
-			hexbinFunc();
 			ptglyphFunc(VISTYPE.pt2);
 			break;
 		case VISTYPE.pt3:
-			hexbinFunc();
 			ptglyphFunc(VISTYPE.pt3);
 			break;
 		case VISTYPE.pie1:
-			hexbinFunc(VISTYPE.pie1);
 			binpieFunc(VISTYPE.pie1);
 			break;
 		case VISTYPE.pie2:
@@ -555,11 +559,9 @@ var updateVis = function(selectedIndex) {
 			weavingFunc(VISTYPE.weaving1);
 			break;
 		case VISTYPE.weaving2:
-			hexbinFunc();
 			weavingFunc(VISTYPE.weaving2);
 			break;
 		case VISTYPE.texture:
-			hexbinFunc();
 			textureFunc();
 		default: // do nothing
 			break;
@@ -667,8 +669,6 @@ var bin_lines = d3.selectAll('svg.pts > g')
 var attenuation = d3.scale.log().range([0,1]);
 
 var ptSize = 3;
-
-
 var ptId = 0;
 var filename = "cluster-data.csv";
 var getFileName = function() {
@@ -682,7 +682,7 @@ function onlyUnique(value, index, self) {
 }
 
 var obj_mapping = {};
-var draw  = function(data_src = "cluster-data.csv") {
+var draw  = function(data_src) {
 	console.log(data_src);
 	// reset old dataset
 	ptData = []; 
@@ -804,6 +804,3 @@ function shuffle(arr) {
 
     return arr;
 };
-
-
-    
