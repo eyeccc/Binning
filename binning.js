@@ -21,30 +21,23 @@ var ptData = [];
 /** adjust these number later ***/
 var width = 600,
     height = 600;
+
 // bin size adjustable
 var hexbin = d3.hexbin()
     .size([width,height])
     .radius(binRad);
-	// hexbin.radius(new)
+
 var hexbins = hexbin(ptData);
-// This part is update the vis (call updateVis)
-// DEBUG: cannot get correct state for vis type after adding dynamic slide for bin size
+
 
 var dropdownChange = function() {
 	var e = document.getElementById("opts");
-	//var text = e.options[e.selectedIndex].text;
-    var selectedIndex = e.selectedIndex;//d3.event.target.selectedIndex? d3.event.target.selectedIndex : selectState;
+    var selectedIndex = e.selectedIndex;
 
-    //var selectedDOMElement =
-    //    d3.event.target.children[selectedIndex];
-   // var selection = d3.select(selectedDOMElement);
-    // I can get text by selection.text()
-	// Use selectedDOMElement.value to get option id
-	// Do sth
 	binRad = document.getElementById("myRange").value;
 	hexbin = d3.hexbin()
-    .size([width,height])
-    .radius(binRad);
+						.size([width,height])
+						.radius(binRad);
 	hexbins = hexbin(ptData);
 	updateVis(selectedIndex);
 }
@@ -99,7 +92,6 @@ var hexbinFunc = function(visType = -1) {
 
 var ptglyphFunc = function(visType) {
 	// try to move all points in binptsvg closer to center of their respective bins
-	//var hexbins = hexbin(ptData);
     var pp = binpts_points.selectAll('g.pts')
         .data(hexbins, function(d) { return d.i + "," + d.j; });
     pp.exit().remove();
@@ -264,7 +256,6 @@ var ptglyphFunc = function(visType) {
 
 var binpieFunc = function(visType) {
 	 // deal with pies
-	//var hexbins = hexbin(ptData);
     var pp = binpie_pies.selectAll('g.pts')
         .data(hexbins, function(d) { return d.i + "," + d.j; })
     pp.exit().remove();
@@ -280,7 +271,6 @@ var binpieFunc = function(visType) {
     pp.each(function(binPts) {
         var thisPie = d3.select(this);
 
-        //var isSize = d3.select(thisPie.node().parentNode.parentNode.parentNode).attr('id') == "binpiesizesvg"; 
 		var isSize = visType === VISTYPE.pie2;
         if (isSize)
             arc.outerRadius(pieScale(binPts.length));
@@ -310,25 +300,13 @@ var binpieFunc = function(visType) {
             })
             .style('opacity', function(d) { return isSize ? 1 : attenuation(binPts.length); });
 
-        // add white outline
-        // thisPie.append('circle')
-        //     .attr('r', 9)
-        //     .style('stroke', '#fff')
-        //     // .style('stroke-width', '1.5')
-        //     .style('fill', 'none');
     });
-
-    /*d3.selectAll(".hexagons  path")
-        .style('fill', function(d) { 
-            return lightnessScale(d.length); 
-        });*/
-
 }
 
 // TODO: there is something wrong for weaving rendering
 var weavingFunc = function(visType) {
 	// deal with weaving
-    //d3.selectAll(".hexagon > path").style("fill-opacity", 0);
+
     d3.selectAll("svg.pts + canvas").each(function() {
         var thisCanvas = d3.select(this);
         var thisID = d3.select(thisCanvas.node().parentNode).select("svg").attr('id');
@@ -345,8 +323,7 @@ var weavingFunc = function(visType) {
         }) 
 
         // now, go through each bin, figure out the proportions, then fill in the hexagon
-		//var hexbins = hexbin(ptData);
-		//attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
+
         hexbins.forEach(function(binPts) {
             // save original transformation (identity)
             ctx.save();
@@ -412,8 +389,6 @@ var weavingFunc = function(visType) {
 
 var textureFunc = function() {
 	// deal with textures (try to be smart about line orientation?)
-	//var hexbins = hexbin(ptData);
-
     d3.selectAll("svg.pts").each(function() {
         var thisCanvas = d3.select(this);
         var test = thisCanvas.selectAll("clipPath#hex")
@@ -426,7 +401,6 @@ var textureFunc = function() {
 					
 		test.select("clipPath#hex path")
 			.attr('d', d3.hexbin().radius(binRad).hexagon());
-		// TODO: fix this part!!!
 
         // blank out background colors
         thisCanvas.selectAll('g.hexagons path')
@@ -483,8 +457,7 @@ var textureFunc = function() {
 
                 var numFreq = freq(count);
                 var stepSize =  (binRad * 2*  Math.cos(15)) / numFreq;
-				//console.log("stepSize");
-				//console.log(stepSize);
+
                 var startAtZero = numFreq % 2 == 1;
                 for (var k = 0; k < numFreq; k++) {
                     if (startAtZero) {
@@ -513,48 +486,6 @@ var textureFunc = function() {
                         .style('stroke-width', 1);
                 }
             });
-			/*
-            // var lines = thisbin.selectAll('line')
-            //     .data(thiscount);
-            // lines.enter().append('line');
-
-            // lines.each(function(count, i) {
-            //     // skip drawing lines if count == 0
-            //     if (count == 0) return;
-
-            //     var thisline = d3.select(this);
-            //     var x = hexagonRadius * Math.sin(angles[i]);
-            //     var y = hexagonRadius * Math.cos(angles[i]);
-
-            //     var numFreq = freq(count);
-            //     var stepSize = hexagonRadius / 2 / numFreq;
-            //     for (var k = 0; k < numFreq; k++) {
-            //         var pos = k % 2 == 1 ? -1 : 1;
-            //         var shift = Math.floor(k / 2) * stepSize * pos;
-            //         var thisx = x + shift;
-            //         var thisy = y - shift;
-            //         thisline.attr({
-            //             'x1': thisx,
-            //             'x2': -thisx,
-            //             'y1': thisy,
-            //             'y2': -thisy
-            //         })
-            //         .style('stroke', colors[i])
-            //         .style('stroke-width', 2);
-            //     }
-            // });
-        
-
-        // ll.append('line')
-        //     .attr({
-        //         x1:-15, y1:-15,
-        //         x2: 15, y2: 15
-        //     })
-        //     .style("stroke", 'red')
-        //     .style("stroke-width", 0.5);
-
-        
-    */
 		});
 	});
 }
@@ -636,16 +567,12 @@ var updateVis = function(selectedIndex) {
 	}
 };
 
-
-    
 // adjust this according to the dataset
 var xd = [0, 10];
 var yd = [0, 10];
 
 var classNum = 4;
 var colors = d3.scale.category10().range().slice(0, classNum); 
-// TODO: make color category dynamic according to dataset
-// TODO: show color mapping to class name on the side according to dataset
 
 var svgDefs = [
 	{
@@ -762,8 +689,6 @@ var draw  = function(data_src = "cluster-data.csv") {
 	ptId = 0;
 	
 	d3.csv(data_src, function(d) { 
-		// need to make category be string not number
-		
 		return [+d.x, +d.y, d.category, ptId++]; 
 	  }, function(error, rows) {
 		
@@ -801,7 +726,6 @@ var draw  = function(data_src = "cluster-data.csv") {
 				.attr('width', '600px')
 				.attr('height', '100px');
 				
-		// i should not use for loop...
 		for(var i = 0; i < classNum; i++) {
 			newsvg.append('rect')
 					.attr('class', 'label')
@@ -815,9 +739,7 @@ var draw  = function(data_src = "cluster-data.csv") {
 						.attr('y', 15)
 						.style('fill', 'black')
 						.text(uniqueClass[i]);
-					
-		}
-				
+		}	
 		
 		xd = [Math.floor(xmin), Math.ceil(xmax)];
 		yd = [Math.floor(ymin), Math.ceil(ymax)];
