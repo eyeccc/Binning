@@ -612,6 +612,7 @@ var Binning = (function() {
 
 		// then append a canvas element
 		thisContainer.append('canvas')
+			.attr('id', 'canvastest')
 			.attr('width', width - margins.left - margins.right)
 			.attr('height', height - margins.top - margins.bottom)
 			.style('top', margins.top + "px")

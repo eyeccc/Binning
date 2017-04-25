@@ -63,7 +63,7 @@ h1 {
 </div>
 <div>Adjust your bin size<input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
 <h2>Notice: This application works best for datasets with less than 10 classes.</h2>
-<div><input type="button" id="btnSave" value="print or save as PDF" onClick="printPDF()"/></div>
+<div><input type="button" id="btnSave" value="save as png" onClick="printPDF()"/>Please right-click to the generated image to save files.</div>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
@@ -74,15 +74,28 @@ h1 {
 <script src="binning.js"></script>
 <script>
 	Binning.draw("cluster-data.csv");
+	// fix this part
+	// from: http://bl.ocks.org/biovisualize/8187844
 	function printPDF()  {
-		var pdf = new jsPDF();
-		pdf.fromHTML($('.point').html(), 15, 15, {
-                            'width': 170,
-                            });
-		pdf.save("testout.pdf")
+		var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
+
+		var canvas = document.getElementById("canvastest");
+		var ctx = canvas.getContext("2d");
+		var DOMURL = self.URL || self.webkitURL || self;
+		var img = new Image();
+		var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+		var url = DOMURL.createObjectURL(svg);
+		img.onload = function() {
+			ctx.drawImage(img, -20, -40);
+			var png = canvas.toDataURL("image/png");
+			document.querySelector('#png-container').innerHTML = '<img src="'+png+'"/>';
+			DOMURL.revokeObjectURL(png);
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+		};
+		img.src = url;
 	}
 	
 </script>
-
+<div id="png-container"></div>
 
 </body>
