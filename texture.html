@@ -45,7 +45,7 @@ h1 {
 
 </style>
 <h1>Exploration of Different Types of Binning</h1>
-<input id="file" type="file" autocomplete="off" onchange="getFileName()"></input>
+<input id="file" type="file" autocomplete="off" onchange="Binning.getFileName()"></input>
 <!-- all possible options -->
 <div>
 <select id = "opts" autocomplete="off">
@@ -71,6 +71,9 @@ h1 {
 <!--<script src="textures.min.js"></script>-->
 <script src="d3.hexbin.min.js"></script>
 <script src="binning.js"></script>
+<script>
+	Binning.draw("cluster-data.csv",1);
+</script>
 
 
 </body>
