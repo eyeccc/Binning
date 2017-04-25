@@ -503,10 +503,7 @@ var Binning = (function() {
 		});
 	}
 
-	var updateVis = function(selectedIndex) {
-		console.log("for debugging:");
-		console.log(selectedIndex); // TODO: remove this log
-		
+	var updateVis = function(selectedIndex) {		
 		// TODO: It is better to do state change detection here, 
 		// so we don't need to redraw everytime we change the dropdown list
 		

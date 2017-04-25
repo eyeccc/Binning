@@ -4,7 +4,7 @@ Exploration of different designs of binning (A survey)
 Link to paper-preprint coming soon...
 
 # Usage
-You can choose your own dataset  from Browse botton. 
+You can choose your own dataset  from Browse button. 
 Note that we only implement the front-end part. 
 Due to browser security issue, it cannot get the full path of the file.
 Thus, your file should be in the same directory of texture.html.

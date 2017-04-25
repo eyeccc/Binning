@@ -63,16 +63,25 @@ h1 {
 </div>
 <div>Adjust your bin size<input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
 <h2>Notice: This application works best for datasets with less than 10 classes.</h2>
-<div><input type="button" id="btnSave" value="print or save as PDF" onClick="window.print()"/></div>
+<div><input type="button" id="btnSave" value="print or save as PDF" onClick="printPDF()"/></div>
 <body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-
+<script src="html2canvas.js"></script>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <!--<script src="textures.min.js"></script>-->
 <script src="d3.hexbin.min.js"></script>
 <script src="binning.js"></script>
 <script>
 	Binning.draw("cluster-data.csv");
+	function printPDF()  {
+		var pdf = new jsPDF();
+		pdf.fromHTML($('.point').html(), 15, 15, {
+                            'width': 170,
+                            });
+		pdf.save("testout.pdf")
+	}
+	
 </script>
 
 
