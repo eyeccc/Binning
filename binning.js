@@ -29,24 +29,30 @@ var hexbin = d3.hexbin()
 
 var hexbins = hexbin(ptData);
 
-
 var dropdownChange = function() {
 	var e = document.getElementById("opts");
     var selectedIndex = e.selectedIndex;
+	updateVis(selectedIndex);
+}
 
+var dropdownChangeBin = function() {
+	var e = document.getElementById("opts");
+    var selectedIndex = e.selectedIndex;
 	binRad = document.getElementById("myRange").value;
 	hexbin = d3.hexbin()
 						.size([width,height])
 						.radius(binRad);
 	hexbins = hexbin(ptData);
-	updateVis(selectedIndex);
+	if (selectedIndex > 0) {
+		updateVis(selectedIndex);
+	}
 }
 
 // track event change (dropdown menu selection change)
 d3.select('#opts')
     .on('change',dropdownChange);
 d3.select('#myRange')
-	.on('change',dropdownChange);
+	.on('change',dropdownChangeBin);
 
 
 var hexbinFunc = function(visType = -1) {
@@ -86,8 +92,6 @@ var hexbinFunc = function(visType = -1) {
 				return lightnessScale(d.length); 
 			});
 		}
-		
-
 }
 
 var ptglyphFunc = function(visType) {
@@ -682,7 +686,7 @@ function onlyUnique(value, index, self) {
 }
 
 var obj_mapping = {};
-var draw  = function(data_src) {
+var draw  = function(data_src, visChoice = null) {
 	console.log(data_src);
 	// reset old dataset
 	ptData = []; 
@@ -774,10 +778,12 @@ var draw  = function(data_src) {
 		});
 
 		ptData = rows;
-
+		hexbins = hexbin(ptData);
 		// keep the previous design selection when changing to another dataset
 		var e = document.getElementById("opts");
-		var selectedIndex = e.selectedIndex;
+		console.log("test draw");
+		console.log(visChoice);
+		var selectedIndex = visChoice || e.selectedIndex;
 		updateVis(selectedIndex);  
 	  }
 	);
@@ -786,6 +792,7 @@ var draw  = function(data_src) {
 
 // initial drawing
 draw(filename);
+// you can use draw(filename, visType) to draw the one design you like
 
 function eucliDist(pt1, pt2) {
     return Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
