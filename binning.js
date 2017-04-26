@@ -722,7 +722,7 @@ var Binning = (function() {
 			d3.selectAll('.label').remove();
 			// this part is for color mapping information
 			var newsvg = 
-				d3.select('body')
+				d3.select('#label-container')
 					.append('svg')
 					.attr('class', 'label')
 					.attr('width', '600px')
@@ -742,9 +742,10 @@ var Binning = (function() {
 							.style('fill', 'black')
 							.text(uniqueClass[i]);
 			}	
-			
-			xd = [Math.floor(xmin), Math.ceil(xmax)];
-			yd = [Math.floor(ymin), Math.ceil(ymax)];
+			var xd_int = xmax - xmin;
+			var yd_int = ymax - ymin;
+			xd = [Math.floor(xmin), Math.ceil(xmax + xd_int/20) ];
+			yd = [Math.floor(ymin), Math.ceil(ymax + yd_int/20)];
 			x1 = d3.scale.linear()
 				.domain(xd)
 				.range([0, width]);
@@ -764,6 +765,17 @@ var Binning = (function() {
 			svg.append('g')
 				.attr('class', 'yaxis axis')
 				.call(d3.svg.axis().orient("left").scale(y1));
+			
+			// This part is for setting style while generating image
+			// since overlay svg to canvas, it does not read css style correctly
+			d3.selectAll('.axis line')
+				.style('fill', 'none')
+				.style('stroke', '#000')
+				.style('shape-rendering', 'crispEdges');
+			d3.selectAll('.axis path')
+				.style('fill', 'none')
+				.style('stroke', '#000')
+				.style('shape-rendering', 'crispEdges');
 			
 			var lables = svg.append('g')
 				.attr('class', 'labels')
@@ -811,6 +823,7 @@ var Binning = (function() {
 	};
 	
 	return {
-		draw: draw
+		draw: draw,
+		getFileName: getFileName
 	};
 })();

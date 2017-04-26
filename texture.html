@@ -80,23 +80,31 @@ h1 {
 		var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
 
 		var canvas = document.getElementById("canvastest");
+		var destCanvas = document.getElementById("destCanvas");
 		var ctx = canvas.getContext("2d");
+		var dctx = destCanvas.getContext("2d");
+		
+		dctx.drawImage(canvas, 20,-20);
+		
 		var DOMURL = self.URL || self.webkitURL || self;
 		var img = new Image();
-		var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+		var svg = new Blob([svgString], {type: "image/svg+xml"});
 		var url = DOMURL.createObjectURL(svg);
 		img.onload = function() {
-			ctx.drawImage(img, -20, -40); // because of the margin size we set
-			var png = canvas.toDataURL("image/png");
+			dctx.drawImage(img, -20, -40); // because of the margin size we set
+			var png = destCanvas.toDataURL("image/png");
 			document.querySelector('#png-container').innerHTML = '<a href="'+png+'" download="image.png"><img id="img1" src="'+png+'"/></a>';
 			DOMURL.revokeObjectURL(png);
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			dctx.clearRect(0, 0, canvas.width, canvas.height);
+			destCanvas.height = 0;
 		};
 		img.src = url;
 	}
 	
 </script>
+<div id="label-container"></div>
+<div id="png-container"></div>
+<canvas id="destCanvas"></canvas>
 
 
 </body>
-<div id="png-container"></div>
