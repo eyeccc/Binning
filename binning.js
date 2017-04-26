@@ -1,5 +1,3 @@
-// TODO: let people download image easily
-// TODO: make a draw function that people can pull out and put in their application
 var Binning = (function() {
 	var VISTYPE = {
 	  scatter: 0,
@@ -312,7 +310,6 @@ var Binning = (function() {
 		});
 	}
 
-	// TODO: there is something wrong for weaving rendering
 	var weavingFunc = function(visType) {
 		// deal with weaving
 		if (visType == VISTYPE.weaving2) {
