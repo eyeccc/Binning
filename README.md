@@ -18,15 +18,15 @@ The following are the enumeration of different vis type:
 var VISTYPE = {
 	  scatter: 0,
 	  blending: 1,
-	  pt1: 2,
-	  pt2: 3,
-	  pt3: 4,
-	  pie1: 5,
-	  pie2: 6,
-	  weaving1: 7,
-	  weaving2: 8,
-	  texture: 9
-	};
+	  pt1: 2, /* randomly subsampled points on color blending bins */
+	  pt2: 3, /* similar to pt1, but keep at least one in a class */
+	  pt3: 4, /* similar to pt2, but represent the minority as triangles */
+	  pie1: 5, /* pie charts with grayscale background */
+	  pie2: 6, /* pie charts varying size */
+	  weaving1: 7, /* weaving with background color of majority class */
+	  weaving2: 8, /* weaving that shows density */
+	  texture: 9 /* using color and orientation for different classes */
+};
 ```
 
 ## Credit
