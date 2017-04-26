@@ -63,7 +63,7 @@ h1 {
 </div>
 <div>Adjust your bin size<input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
 <h2>Notice: This application works best for datasets with less than 10 classes.</h2>
-<div><input type="button" id="btnSave" value="save as png" onClick="printPDF()"/>Please right-click to the generated image to save files.</div>
+<div><input type="button" id="btnSave" value="generate png" onClick="printPDF()"/> Please click on the generated image below to save files.</div>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
@@ -86,9 +86,9 @@ h1 {
 		var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
 		var url = DOMURL.createObjectURL(svg);
 		img.onload = function() {
-			ctx.drawImage(img, -20, -40);
+			ctx.drawImage(img, -20, -40); // because of the margin size we set
 			var png = canvas.toDataURL("image/png");
-			document.querySelector('#png-container').innerHTML = '<img src="'+png+'"/>';
+			document.querySelector('#png-container').innerHTML = '<a href="'+png+'" download="image.png"><img id="img1" src="'+png+'"/></a>';
 			DOMURL.revokeObjectURL(png);
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 		};
@@ -96,6 +96,7 @@ h1 {
 	}
 	
 </script>
-<div id="png-container"></div>
+
 
 </body>
+<div id="png-container"></div>
