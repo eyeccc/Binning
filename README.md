@@ -4,16 +4,18 @@ Exploration of different designs of binning (A survey)
 Link to paper-preprint coming soon...
 
 # Usage
-You can choose your own dataset  from Browse button. 
+You can choose your own dataset from Browse button. 
 Note that we only implement the front-end part. 
 Due to browser security issue, it cannot get the full path of the file.
 Thus, your file should be in the same directory of texture.html.
 Users can change vis type by using the dropdown list.
 They can adjust the bin size by changing the value of the slider.
+PNG of the current vis will be generated under the current visualization after clicking "generate png" button.
+Clicking on the generated image allows you to save the image.
 
-Alternatively, users can directly use ```draw(filename, vistype, binSize)``` to draw a specific one they like.
-Note that if you are trying to pull out only the draw function, filename and vistype is required.
-The following are the enumeration of different vis type:
+Alternatively, users can directly use ```Binning.draw(filename, vistype, binSize)``` to draw a specific one they like.
+Note that if you are trying to pull out only the draw function, ```filename``` and ```vistype``` are required.
+The following are the enumeration of different vis types:
 ```
 var VISTYPE = {
 	  scatter: 0,
