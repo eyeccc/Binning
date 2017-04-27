@@ -718,6 +718,7 @@ var Binning = (function() {
 			}
 			d3.selectAll('.label').remove();
 			// this part is for color mapping information
+			// TODO: need to adjust position, the current version might cause text overlapping when text is too long
 			var newsvg = 
 				d3.select('#label-container')
 					.append('svg')
@@ -729,13 +730,13 @@ var Binning = (function() {
 				newsvg.append('rect')
 						.attr('class', 'label')
 						.attr('x', i*100+ 100)
-						.attr('width', '20px')
-						.attr('height', '20px')
+						.attr('width', '10px')
+						.attr('height', '10px')
 						.attr('fill', colors[i]);
 				newsvg.append('text')
 							.attr('class', 'label')
 							.attr('x', i*100+ 130)
-							.attr('y', 15)
+							.attr('y', 12)
 							.style('fill', 'black')
 							.text(uniqueClass[i]);
 			}	

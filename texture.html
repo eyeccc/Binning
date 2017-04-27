@@ -43,68 +43,74 @@ h1 {
 	display: block;
 }
 
-</style>
-<h1>Exploration of Different Types of Binning</h1>
-<input id="file" type="file" autocomplete="off" onchange="Binning.getFileName()"></input>
-<!-- all possible options -->
-<div>
-<select id = "opts" autocomplete="off">
-	<option value="scatter" selected="selected">scatterplot</option>
-	<option value="blending">blending</option> 
-	<option value="pt1">point glyph (random)</option>
-	<option value="pt2">point glyph (at least one of each class)</option>
-	<option value="pt3">point glyph (explicit outliers as △)</option>
-	<option value="pie1">pie chart (with grayscale background)</option>
-	<option value="pie2">pie chart (varying size)</option>
-	<option value="weaving1">weaving (with background color)</option>
-	<option value="weaving2">weaving (show density)</option>
-	<option value="texture">color + orientaion</option>
-</select>
-</div>
-<div>Adjust your bin size<input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
-<h2>Notice: This application works best for datasets with less than 10 classes.</h2>
-<div><input type="button" id="btnSave" value="generate png" onClick="printPDF()"/> Please click on the generated image below to save files.</div>
-<body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-<script src="html2canvas.js"></script>
-<script src="https://d3js.org/d3.v3.min.js"></script>
-<!--<script src="textures.min.js"></script>-->
-<script src="d3.hexbin.min.js"></script>
-<script src="binning.js"></script>
-<script>
-	Binning.draw("cluster-data.csv");
-	// fix this part
-	// from: http://bl.ocks.org/biovisualize/8187844
-	function printPDF()  {
-		var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
 
-		var canvas = document.getElementById("canvastest");
-		var destCanvas = document.getElementById("destCanvas");
-		var ctx = canvas.getContext("2d");
-		var dctx = destCanvas.getContext("2d");
+</style>
+<head>
+	<title>Exploration of Different Types of Binning</title>
+	<!--link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"-->
+	<!--link rel="stylesheet" href="slider.css"-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+	<h1>Exploration of Different Types of Binning</h1>
+	<input id="file" type="file" autocomplete="off" onchange="Binning.getFileName()"></input>
+	<!-- all possible options -->
+	<div class="dropdown">
+		<select id = "opts" autocomplete="off">
+			<option value="scatter" selected="selected">scatterplot</option>
+			<option value="blending">blending</option> 
+			<option value="pt1">point glyph (random)</option>
+			<option value="pt2">point glyph (at least one of each class)</option>
+			<option value="pt3">point glyph (explicit outliers as △)</option>
+			<option value="pie1">pie chart (with grayscale background)</option>
+			<option value="pie2">pie chart (varying size)</option>
+			<option value="weaving1">weaving (with background color)</option>
+			<option value="weaving2">weaving (show density)</option>
+			<option value="texture">color + orientaion</option>
+		</select>
+	</div>
+	<div>Adjust your bin size<input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
+	<h2>Notice: This application works best for datasets with less than 10 classes.</h2>
+	<div><input type="button" id="btnSave" value="generate png" onClick="printPDF()"/> Please click on the generated image below to save files.</div>
+		<script src="https://d3js.org/d3.v3.min.js"></script>
+		<script src="d3.hexbin.min.js"></script>
+		<script src="binning.js"></script>
+	<script>
+		Binning.draw("cluster-data.csv");
+		// fix this part
+		// from: http://bl.ocks.org/biovisualize/8187844
+		function printPDF()  {
+			var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
+
+			var canvas = document.getElementById("canvastest");
+			var destCanvas = document.getElementById("destCanvas");
+			var ctx = canvas.getContext("2d");
+			var dctx = destCanvas.getContext("2d");
+			
+			dctx.drawImage(canvas, 20,-20);
+			
+			var DOMURL = self.URL || self.webkitURL || self;
+			var img = new Image();
+			var svg = new Blob([svgString], {type: "image/svg+xml"});
+			var url = DOMURL.createObjectURL(svg);
+			img.onload = function() {
+				dctx.drawImage(img, -20, -40); // because of the margin size we set
+				var png = destCanvas.toDataURL("image/png");
+				document.querySelector('#png-container').innerHTML = '<a href="'+png+'" download="image.png"><img id="img1" src="'+png+'"/></a>';
+				DOMURL.revokeObjectURL(png);
+				dctx.clearRect(0, 0, canvas.width, canvas.height);
+				destCanvas.height = 0;
+			};
+			img.src = url;
+		}
 		
-		dctx.drawImage(canvas, 20,-20);
-		
-		var DOMURL = self.URL || self.webkitURL || self;
-		var img = new Image();
-		var svg = new Blob([svgString], {type: "image/svg+xml"});
-		var url = DOMURL.createObjectURL(svg);
-		img.onload = function() {
-			dctx.drawImage(img, -20, -40); // because of the margin size we set
-			var png = destCanvas.toDataURL("image/png");
-			document.querySelector('#png-container').innerHTML = '<a href="'+png+'" download="image.png"><img id="img1" src="'+png+'"/></a>';
-			DOMURL.revokeObjectURL(png);
-			dctx.clearRect(0, 0, canvas.width, canvas.height);
-			destCanvas.height = 0;
-		};
-		img.src = url;
-	}
-	
-</script>
-<div id="label-container"></div>
-<div id="png-container"></div>
-<canvas id="destCanvas"></canvas>
+	</script>
+	<div id="label-container"></div>
+	<div id="png-container"></div>
+	<canvas id="destCanvas"></canvas>
 
 
 </body>
