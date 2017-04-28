@@ -515,7 +515,7 @@ var Binning = (function() {
 		// remove pies
 		d3.selectAll(".pie").remove();
 		// clear canvas
-		d3.selectAll('canvas')
+		d3.selectAll('#canvastest')
 			.attr('width', width)
 			.attr('height', height);
 		// remove textures
@@ -671,7 +671,8 @@ var Binning = (function() {
 	var ptId = 0;
 	var filename = "cluster-data.csv";
 	var getFileName = function() {
-		filename = document.getElementById("file").value;
+		filename = document.getElementById("file").files[0].name;
+		//console.log(filename);
 		// TODO: require getting full path length
 		draw(filename);
 	}

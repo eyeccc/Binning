@@ -6,6 +6,7 @@ body {
     display: block;  /*might want to change to other style*/
     flex-flow: row wrap;
     justify-content: space-around;
+    font-family: sans-serif;
 }
 
 .canvasContainer {
@@ -43,6 +44,31 @@ h1 {
 	display: block;
 }
 
+.funcbox {
+	background-color: beige;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    max-width: 600px;
+}
+
+.tooltiptext {
+    visibility: hidden;
+    /* width: 120px; */
+    background-color: #9E9E9E;
+    color: #fff;
+    /* text-align: center; */
+    border-radius: 6px;
+    padding: 5px 5px;
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
 
 </style>
 <head>
@@ -56,9 +82,14 @@ h1 {
 
 <body>
 	<h1>Exploration of Different Types of Binning</h1>
-	<input id="file" type="file" autocomplete="off" onchange="Binning.getFileName()"></input>
+	<h3>Notice: This application works best for datasets with less than 10 classes.</h3>
+	<div class="funcbox">
+	<form enctype="multipart/form-data" action="/upload/" method="post">
+	Upload local file: <input id="file" type="file" autocomplete="off" onchange="Binning.getFileName()"></input>
+	</form>
 	<!-- all possible options -->
 	<div class="dropdown">
+	Choose designs:
 		<select id = "opts" autocomplete="off">
 			<option value="scatter" selected="selected">scatterplot</option>
 			<option value="blending">blending</option> 
@@ -72,9 +103,11 @@ h1 {
 			<option value="texture">color + orientaion</option>
 		</select>
 	</div>
-	<div>Adjust your bin size<input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
-	<h2>Notice: This application works best for datasets with less than 10 classes.</h2>
-	<div><input type="button" id="btnSave" value="generate png" onClick="printPDF()"/> Please click on the generated image below to save files.</div>
+	<div>Adjust your bin size: <input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
+	<div class="tooltip">Generate png of the current design: <input type="button" id="btnSave" value="generate" onClick="printPDF()"/> 
+	<span class="tooltiptext">Please click on the generated image under the original visualization to save files.</span> 
+	</div>
+	</div>
 		<script src="https://d3js.org/d3.v3.min.js"></script>
 		<script src="d3.hexbin.min.js"></script>
 		<script src="binning.js"></script>
@@ -110,7 +143,7 @@ h1 {
 	</script>
 	<div id="label-container"></div>
 	<div id="png-container"></div>
-	<canvas id="destCanvas"></canvas>
+	<canvas id="destCanvas" height="0px" width="1px"></canvas>
 
 
 </body>
