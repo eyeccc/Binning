@@ -515,7 +515,7 @@ var Binning = (function() {
 		// remove pies
 		d3.selectAll(".pie").remove();
 		// clear canvas
-		d3.selectAll('#canvastest')
+		d3.selectAll('canvas')
 			.attr('width', width)
 			.attr('height', height);
 		// remove textures
