@@ -84,9 +84,12 @@ h1 {
 	<h1>Exploration of Different Types of Binning</h1>
 	<h3>Notice: This application works best for datasets with less than 10 classes.</h3>
 	<div class="funcbox">
+	<div>
 	<form enctype="multipart/form-data" action="/upload/" method="post">
 	Upload local file: <input id="file" type="file" autocomplete="off" onchange="Binning.getFileName()"></input>
 	</form>
+	Only support csv files
+	</div>
 	<!-- all possible options -->
 	<div class="dropdown">
 	Choose designs:
