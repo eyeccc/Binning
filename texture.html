@@ -85,10 +85,9 @@ h1 {
 	<h3>Notice: This application works best for datasets with less than 10 classes.</h3>
 	<div class="funcbox">
 	<div>
-	<form enctype="multipart/form-data" action="/upload/" method="post">
-	Upload local file: <input id="file" type="file" autocomplete="off" onchange="Binning.getFileName()"></input>
+	<form enctype="multipart/form-data" method="post">
+	Upload local file: <input id="file" type="file" autocomplete="off" onchange="Binning.getFileName()">Only support csv files</input>
 	</form>
-	Only support csv files
 	</div>
 	<!-- all possible options -->
 	<div class="dropdown">
@@ -115,7 +114,7 @@ h1 {
 		<script src="d3.hexbin.min.js"></script>
 		<script src="binning.js"></script>
 	<script>
-		Binning.draw("cluster-data.csv");
+		Binning.draw("static/cluster-data.csv");
 		// fix this part
 		// from: http://bl.ocks.org/biovisualize/8187844
 		function printPDF()  {
