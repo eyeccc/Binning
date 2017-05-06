@@ -125,21 +125,25 @@ h1 {
 		// fix this part
 		// from: http://bl.ocks.org/biovisualize/8187844
 		function printPDF()  {
+			//var trans = d3.selectAll('svg');
+			//trans.select('transform', function(d) { return 'translate(' + d.x + "," + d.y + 20 + ")"});
 			var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
-
+			//trans.select('transform', function(d) { return 'translate(' + d.x + "," + d.y - 20 + ")"});
+			
 			var canvas = document.getElementById("canvastest");
 			var destCanvas = document.getElementById("destCanvas");
 			var ctx = canvas.getContext("2d");
 			var dctx = destCanvas.getContext("2d");
-			
-			dctx.drawImage(canvas, 20,-20);
+			destCanvas.height = 600;
+			destCanvas.width = 600;
+			dctx.drawImage(canvas, 40, 20); // need some offset
 			
 			var DOMURL = self.URL || self.webkitURL || self;
 			var img = new Image();
 			var svg = new Blob([svgString], {type: "image/svg+xml"});
 			var url = DOMURL.createObjectURL(svg);
 			img.onload = function() {
-				dctx.drawImage(img, -20, -40); // because of the margin size we set
+				dctx.drawImage(img, 0, 0); // because of the margin size we set
 				var png = destCanvas.toDataURL("image/png");
 				document.querySelector('#png-container').innerHTML = '<a href="'+png+'" download="image.png"><img id="img1" src="'+png+'"/></a>';
 				DOMURL.revokeObjectURL(png);

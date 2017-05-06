@@ -94,6 +94,9 @@ var Binning = (function() {
 
 	var ptglyphFunc = function(visType) {
 		// try to move all points in binptsvg closer to center of their respective bins
+		
+		// TODO: instead of fetching scatter points and remove unnecessary ones
+		// Try to calculate all those behind the scene and only plot the necessary ones
 		hexbinFunc();
 		var pp = binpts_points.selectAll('g.pts')
 			.data(hexbins, function(d) { return d.i + "," + d.j; });
@@ -106,7 +109,42 @@ var Binning = (function() {
 			.data(function(d) { return d; }, function(d) { return d[3]; });
 
 		newpp.exit().remove();
-		newpp.enter().append('circle')
+		// this part draw everything
+		/*newpp.enter().append('circle')
+			.attr('class', 'point')
+			.attr('r', 2)
+			.attr('cx', function(d) { return d[0]})
+			.attr('cy', function(d) { return d[1]})
+			.style('fill', function(d) { return colors[d[2]]; })
+			.style('stroke', '#333')
+			.style('stroke-width', '0.5px');*/
+		
+		// use hexbins instead
+		// the last element in the array is the bin information
+		newpts = [];
+		for(var i = 0; i < hexbins.length; i++) {
+			var len = hexbins[i].length;
+			for(var j = 0; j < len; j++) {
+				var binCenter = [hexbins[i].x, hexbins[i].y];
+				var unitpt = [hexbins[i][j][0] - binCenter[0], hexbins[i][j][1] - binCenter[1]];
+				var dist = Math.sqrt(unitpt.reduce(function(p, d) { return p + Math.pow(d,2); }, 0));
+				
+				var distThreshold = binRad / 2;
+				var pt = hexbins[i][j];
+				if (dist > distThreshold) {
+					var newPos = unitpt.map(function(d) { return d * distThreshold / dist ; });
+					pt[0] = binCenter[0] + newPos[0];
+					pt[1] = binCenter[1] + newPos[1];
+				}
+				newpts.push(pt);
+			}
+		}
+		var newppp = pp.selectAll('circle.point')
+			.data(newpts);
+		newppp.exit().remove();
+		
+		newppp.enter().append('circle')
+			.data(newpts)
 			.attr('class', 'point')
 			.attr('r', 2)
 			.attr('cx', function(d) { return d[0]})
@@ -115,6 +153,15 @@ var Binning = (function() {
 			.style('stroke', '#333')
 			.style('stroke-width', '0.5px');
 
+		/*newpp.enter().append('circle')
+			.attr('class', 'point')
+			.attr('r', 2)
+			.attr('cx', function(d) { return d[0]})
+			.attr('cy', function(d) { return d[1]})
+			.style('fill', function(d) { return colors[d[2]]; })
+			.style('stroke', '#333')
+			.style('stroke-width', '0.5px');
+		
 		// try moving points closer to the origin of their bins??
 		newpp.each(function(pData, i) {
 			pData.remove = false;
@@ -132,7 +179,7 @@ var Binning = (function() {
 				pt.attr('cx', binCenter[0] + newPos[0])
 					.attr('cy', binCenter[1] + newPos[1]);
 			}
-		});
+		});*/
 		
 		// diverge here, remove baesd on # points, or # classes
 		binpts_points.each(function(d, i) {
