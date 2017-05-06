@@ -117,7 +117,7 @@ h1 {
 		<script src="{{ url_for('static', filename='binning.js') }}"></script>
 	<script>
 		var params = get_params(location.search);
-		console.log(params['filename']);
+		//console.log(params['filename']);
 		var file = params['filename'] ? 
 			"/uploads/" + params['filename'] : 
 			"{{ url_for('static', filename='cluster-data.csv') }}";
