@@ -28,7 +28,9 @@ var VISTYPE = {
 	  pie2: 6, /* pie charts varying size */
 	  weaving1: 7, /* weaving with background color of majority class */
 	  weaving2: 8, /* weaving that shows density */
-	  texture: 9 /* using color and orientation for different classes */
+	  texture: 9, /* using color and orientation for different classes */
+	  attrblk: 10, /* using color and position to encode class identity */
+	  bar: 11 /* using bar charts to show proportion of each class within a bin */
 };
 ```
 
