@@ -125,11 +125,8 @@ h1 {
 		// fix this part
 		// from: http://bl.ocks.org/biovisualize/8187844
 		function printPDF()  {
-			//var trans = d3.selectAll('svg');
-			//trans.select('transform', function(d) { return 'translate(' + d.x + "," + d.y + 20 + ")"});
 			var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
-			//trans.select('transform', function(d) { return 'translate(' + d.x + "," + d.y - 20 + ")"});
-			
+
 			var canvas = document.getElementById("canvastest");
 			var destCanvas = document.getElementById("destCanvas");
 			var ctx = canvas.getContext("2d");
@@ -143,7 +140,7 @@ h1 {
 			var svg = new Blob([svgString], {type: "image/svg+xml"});
 			var url = DOMURL.createObjectURL(svg);
 			img.onload = function() {
-				dctx.drawImage(img, 0, 0); // because of the margin size we set
+				dctx.drawImage(img, 0, 0); // this part draws the svg to canvas
 				var png = destCanvas.toDataURL("image/png");
 				document.querySelector('#png-container').innerHTML = '<a href="'+png+'" download="image.png"><img id="img1" src="'+png+'"/></a>';
 				DOMURL.revokeObjectURL(png);
