@@ -185,9 +185,9 @@ var Binning = (function() {
 						
 						var maxPt;
 						var maxDist = -Infinity;
-						thesePoints.each(function(thisPt) {
+						thesePoints.forEach(function(thisPt) {
 							var minDist = Infinity;
-							thosePoints.each(function(thatPt) {
+							thosePoints.forEach(function(thatPt) {
 								var dist = eucliDist(thisPt, thatPt); 
 								if (dist < minDist) {
 									minDist = dist;
@@ -200,11 +200,11 @@ var Binning = (function() {
 							}
 						});
 						
-						var pickedPt = maxPt.each(function(d, i) {
+						var pickedPt = maxPt.forEach(function(d, i) {
 							d.selected = true;
 
 							// also mark as outlier if this is the only point of this class in this bin
-							if (thesePoints.size() == 1) 
+							if (thesePoints.length == 1) 
 								d.isOutlier = true; 
 						});
 				});
@@ -223,7 +223,7 @@ var Binning = (function() {
 
 					binPts.forEach(function(curData, curI) { 
 						if (!curData.remove) {
-							binPts.each(function(d, i) {
+							binPts.forEach(function(d, i) {
 								if (eucliDist(d, curData) < ptThreshold && i != curI && !d.selected)
 									d.remove = true;
 							});
@@ -232,7 +232,7 @@ var Binning = (function() {
 				// leave here-----------------------------------------------------------------------------
 				// finally, actually remove the subsampled points
 				thisPoints.filter(function(d) { return !d.remove; });
-				d3.append('circle')
+				d3.selectAll('circle.point').append('circle')
 					.data(thisPoints)
 					.attr('class', 'point')
 					.attr('r', 2)
