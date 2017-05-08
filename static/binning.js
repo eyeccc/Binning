@@ -9,7 +9,9 @@ var Binning = (function() {
 	  pie2: 6,
 	  weaving1: 7,
 	  weaving2: 8,
-	  texture: 9
+	  texture: 9,
+	  attrblk: 10,
+	  bar: 11
 	};
 
 	var margins = {top: 20, right: 20, bottom: 40, left: 40};
@@ -84,7 +86,7 @@ var Binning = (function() {
 					})
 					.style('fill-opacity', function(d) { return attenuation(d.length); });
 					
-			if (visType === VISTYPE.pie1) {
+			if (visType === VISTYPE.pie1 || visType === VISTYPE.bar) {
 				d3.selectAll(".hexagons  path")
 					.style('fill', function(d) { 
 					return lightnessScale(d.length); 
@@ -94,6 +96,9 @@ var Binning = (function() {
 
 	var ptglyphFunc = function(visType) {
 		// try to move all points in binptsvg closer to center of their respective bins
+		
+		// TODO: instead of fetching scatter points and remove unnecessary ones
+		// Try to calculate all those behind the scene and only plot the necessary ones
 		hexbinFunc();
 		var pp = binpts_points.selectAll('g.pts')
 			.data(hexbins, function(d) { return d.i + "," + d.j; });
@@ -106,6 +111,7 @@ var Binning = (function() {
 			.data(function(d) { return d; }, function(d) { return d[3]; });
 
 		newpp.exit().remove();
+		// this part draw everything
 		newpp.enter().append('circle')
 			.attr('class', 'point')
 			.attr('r', 2)
@@ -114,7 +120,50 @@ var Binning = (function() {
 			.style('fill', function(d) { return colors[d[2]]; })
 			.style('stroke', '#333')
 			.style('stroke-width', '0.5px');
+		
+		// use hexbins instead
+		// the last element in the array is the bin information
+		/*newpts = [];
+		for(var i = 0; i < hexbins.length; i++) {
+			var len = hexbins[i].length;
+			for(var j = 0; j < len; j++) {
+				var binCenter = [hexbins[i].x, hexbins[i].y];
+				var unitpt = [hexbins[i][j][0] - binCenter[0], hexbins[i][j][1] - binCenter[1]];
+				var dist = Math.sqrt(unitpt.reduce(function(p, d) { return p + Math.pow(d,2); }, 0));
+				
+				var distThreshold = binRad / 2;
+				var pt = hexbins[i][j];
+				if (dist > distThreshold) {
+					var newPos = unitpt.map(function(d) { return d * distThreshold / dist ; });
+					pt[0] = binCenter[0] + newPos[0];
+					pt[1] = binCenter[1] + newPos[1];
+				}
+				newpts.push(pt);
+			}
+		}
+		var newppp = pp.selectAll('circle.point')
+			.data(newpts);
+		newppp.exit().remove();
+		
+		newppp.enter().append('circle')
+			.data(newpts)
+			.attr('class', 'point')
+			.attr('r', 2)
+			.attr('cx', function(d) { return d[0]})
+			.attr('cy', function(d) { return d[1]})
+			.style('fill', function(d) { return colors[d[2]]; })
+			.style('stroke', '#333')
+			.style('stroke-width', '0.5px');
 
+		newpp.enter().append('circle')
+			.attr('class', 'point')
+			.attr('r', 2)
+			.attr('cx', function(d) { return d[0]})
+			.attr('cy', function(d) { return d[1]})
+			.style('fill', function(d) { return colors[d[2]]; })
+			.style('stroke', '#333')
+			.style('stroke-width', '0.5px');*/
+		
 		// try moving points closer to the origin of their bins??
 		newpp.each(function(pData, i) {
 			pData.remove = false;
@@ -260,7 +309,7 @@ var Binning = (function() {
 	var binpieFunc = function(visType) {
 		 // deal with pies
 		 if(visType == VISTYPE.pie1) {
-			hexbinFunc();
+			hexbinFunc(VISTYPE.pie1);
 		 }
 		 
 		var pp = binpie_pies.selectAll('g.pts')
@@ -499,6 +548,184 @@ var Binning = (function() {
 			});
 		});
 	}
+	
+	var attrblkFunc = function(){
+		hexbinFunc();
+		d3.selectAll("svg.pts").each(function() {
+			var thisCanvas = d3.select(this);
+			var element = thisCanvas.selectAll("clipPath#hex")
+				.data([0]);
+				
+			element.enter().append('clipPath')
+					.attr('id', 'hex')
+						.append('path')
+						.attr('d', d3.hexbin().radius(binRad).hexagon()); 
+						
+			element.select("clipPath#hex path")
+				.attr('d', d3.hexbin().radius(binRad).hexagon());
+
+			// blank out background colors
+			thisCanvas.selectAll('g.hexagons path')
+				.style('fill', null)
+				.style('fill-opacity', 0)
+				.style('stroke', 'black')
+				.style('stroke-width', 0.5);
+
+			// do brain-dead thing and get max of any one class in all
+			var maxClass = hexbins.reduce(function(p, thishex) {
+				thiscount = thishex.reduce(
+					function(p, d) { 
+						p[d[2]]++; return p;
+					}, Array(classNum).fill(0));
+				return p.map(function(d, i) {
+					return d > thiscount[i] ? d : thiscount[i];
+				});
+			}, Array(classNum).fill(0));
+			
+			var colorBins = 8;
+			var freq = d3.scale.quantize()
+				.domain([0, d3.max(maxClass)])
+				.range(d3.range(1,colorBins)); // bin the numerosity into 12 categories
+
+			//var angles = d3.range(0, Math.PI, Math.PI / classNum);
+			var n = Math.ceil(Math.sqrt(classNum));
+			var dx = binRad/n;
+			var dy = binRad/n;
+			
+			var place =[];
+			// should find a better way for choosing position of each block
+			if(n === 2){
+				dx /= 2;
+				dy /= 2;
+				place = [[-dx, -dy],[dx, -dy],
+				[-dx, dy],[dx, dy]
+				];
+			}else{
+				place = [[-dx, -dy],[0, -dy],[dx, -dy],
+				[-dx, 0],[0,0],[dx, 0],
+				[-dx, dy],[0, dy],[dx, dy]
+				];
+			}
+
+			var ll = bin_blocks.selectAll('g.binblocks')
+				.data(hexbins, function(d) { return d.i + "," + d.j; });
+			ll.exit().remove();
+			var newblocks = ll.enter().append('g')
+				.attr('class', 'binblocks')
+				.attr('id', function(d) { return d.i + "," + d.j; })
+				.attr('clip-path', 'url(#hex)')
+				.attr('transform', function(d) { return 'translate(' + d.x + "," + d.y + ")"; });
+
+			ll.each(function(thishex) {
+				var thisbin = d3.select(this);
+				var thiscount = thishex.reduce(
+					function(p, d) { 
+						p[d[2]]++; return p;
+					}, Array(classNum).fill(0));
+
+				var blkgrp = thisbin.selectAll('g.blkgrp')
+					.data(thiscount);
+				blkgrp.enter().append('g')
+					.attr('class', 'blkgrp');
+
+				blkgrp.each(function(count, i) {
+					// skip drawing lines if count == 0
+					//if (count == 0) return;
+
+					var thisgrp = d3.select(this);
+					var x = place[i][0]; //( (binRad - 0.5) )* Math.sin(angles[i]);
+					var y = place[i][1];//( (binRad - 0.5) ) * Math.cos(angles[i]);
+
+					var numFreq = freq(count);
+					var colorinter = 
+						d3.interpolateLab("white", colors[i])(numFreq/colorBins);
+
+					thisgrp.append('rect')
+							.attr({
+								'x': x - binRad/n/2,
+								'y': y - binRad/n/2,
+								'width': binRad/n,
+								'height': binRad/n
+							})
+							.style('fill', colorinter)
+							.style('stroke', 'black')
+							.style('stroke-width', 0.5);
+				});
+			});
+		});
+		
+	}
+	
+	var barFunc = function(){
+		hexbinFunc(VISTYPE.bar);	
+		d3.selectAll("svg.pts").each(function() {
+			var thisCanvas = d3.select(this);
+			var element = thisCanvas.selectAll("clipPath#hex")
+				.data([0]);
+				
+			element.enter().append('clipPath')
+					.attr('id', 'hex')
+						.append('path')
+						.attr('d', d3.hexbin().radius(binRad).hexagon()); 
+						
+			element.select("clipPath#hex path")
+				.attr('d', d3.hexbin().radius(binRad).hexagon());
+
+			// blank out background colors
+			thisCanvas.selectAll('g.hexagons path')
+				.style('stroke', 'black')
+				.style('stroke-width', 0.5);
+
+			var ll = bin_bar.selectAll('g.bar')
+				.data(hexbins, function(d) { return d.i + "," + d.j; });
+			ll.exit().remove();
+			var newbars = ll.enter().append('g')
+				.attr('class', 'bar')
+				.attr('id', function(d) { return d.i + "," + d.j; })
+				.attr('clip-path', 'url(#hex)')
+				.attr('transform', function(d) { return 'translate(' + d.x + "," + d.y + ")"; });
+
+			ll.each(function(thishex) {
+				var thisbin = d3.select(this);
+				var thiscount = thishex.reduce(
+					function(p, d) { 
+						p[d[2]]++; return p;
+					}, Array(classNum).fill(0));
+					
+				var thisSum = thiscount.reduce(function(acc, val) {
+				  return acc + val;
+				}, 0);
+				//console.log(thisSum);
+
+				var bargrp = thisbin.selectAll('g.bargrp')
+					.data(thiscount);
+				bargrp.enter().append('g')
+					.attr('class', 'bargrp');
+
+				bargrp.each(function(count, i) {
+					// skip drawing lines if count == 0
+					//if (count == 0) return;
+
+					var thisgrp = d3.select(this);
+					var w = Math.abs(binRad* Math.cos(30/ Math.PI)*2/classNum)/2; //* Math.cos(30/ Math.PI);
+					var x = -w*classNum/2;//( (binRad - 0.5) )* Math.sin(angles[i]);
+					var y = binRad * Math.sin(30/classNum)/2;//( (binRad - 0.5) ) * Math.cos(angles[i]);
+
+					thisgrp.append('rect')
+							.attr({
+								'x': x + i*w,
+								'y': y - binRad* Math.sin(30/classNum)*count/thisSum,
+								'width': w,
+								'height': binRad* Math.sin(30/classNum)*count/thisSum
+								})
+							.style('fill', colors[i])
+							.style('stroke', 'black')
+							.style('stroke-width', 0.5);
+				});
+			});
+		});
+		
+	}
 
 	var updateVis = function(selectedIndex) {		
 		// TODO: It is better to do state change detection here, 
@@ -520,6 +747,10 @@ var Binning = (function() {
 			.attr('height', height);
 		// remove textures
 		d3.selectAll('.binlines').remove();
+		// remove blocks
+		d3.selectAll(".binblocks").remove();
+		// remove bars
+		d3.selectAll(".bar").remove();
 
 		switch (selectedIndex) {
 			case VISTYPE.scatter: //scatterplot
@@ -561,6 +792,13 @@ var Binning = (function() {
 				break;
 			case VISTYPE.texture:
 				textureFunc();
+				break;
+			case VISTYPE.attrblk:
+				attrblkFunc();
+				break;
+			case VISTYPE.bar:
+				barFunc();
+				break;
 			default: // do nothing
 				break;
 		
@@ -665,6 +903,14 @@ var Binning = (function() {
 		.append('g').attr('class', 'lines')
 		.attr('clip-path', 'url(#clip)');
 
+	var bin_blocks = d3.selectAll('svg.pts > g')
+		.append('g').attr('class', 'blocks')
+		.attr('clip-path', 'url(#clip)');
+		
+	var bin_bar = d3.selectAll('svg.pts > g')
+		.append('g').attr('class', 'bars')
+		.attr('clip-path', 'url(#clip)');
+
 	var attenuation = d3.scale.log().range([0,1]);
 
 	var ptSize = 3;
@@ -674,7 +920,7 @@ var Binning = (function() {
 		filename = document.getElementById("file").files[0].name;
 		//console.log(filename);
 		// TODO: require getting full path length
-		draw("/uploads/" + filename);
+		draw(filename);
 	}
 
 	function onlyUnique(value, index, self) { 
@@ -683,7 +929,7 @@ var Binning = (function() {
 
 	var obj_mapping = {};
 	var draw  = function(data_src, visChoice = null, binSize = null) {
-		console.log(data_src);
+
 		// reset old dataset
 		ptData = []; 
 		ptId = 0;

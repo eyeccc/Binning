@@ -10,7 +10,8 @@ var Binning = (function() {
 	  weaving1: 7,
 	  weaving2: 8,
 	  texture: 9,
-	  attrblk: 10
+	  attrblk: 10,
+	  bar: 11
 	};
 
 	var margins = {top: 20, right: 20, bottom: 40, left: 40};
@@ -85,7 +86,7 @@ var Binning = (function() {
 					})
 					.style('fill-opacity', function(d) { return attenuation(d.length); });
 					
-			if (visType === VISTYPE.pie1) {
+			if (visType === VISTYPE.pie1 || visType === VISTYPE.bar) {
 				d3.selectAll(".hexagons  path")
 					.style('fill', function(d) { 
 					return lightnessScale(d.length); 
@@ -654,6 +655,77 @@ var Binning = (function() {
 		});
 		
 	}
+	
+	var barFunc = function(){
+		hexbinFunc(VISTYPE.bar);	
+		d3.selectAll("svg.pts").each(function() {
+			var thisCanvas = d3.select(this);
+			var element = thisCanvas.selectAll("clipPath#hex")
+				.data([0]);
+				
+			element.enter().append('clipPath')
+					.attr('id', 'hex')
+						.append('path')
+						.attr('d', d3.hexbin().radius(binRad).hexagon()); 
+						
+			element.select("clipPath#hex path")
+				.attr('d', d3.hexbin().radius(binRad).hexagon());
+
+			// blank out background colors
+			thisCanvas.selectAll('g.hexagons path')
+				.style('stroke', 'black')
+				.style('stroke-width', 0.5);
+
+			var ll = bin_bar.selectAll('g.bar')
+				.data(hexbins, function(d) { return d.i + "," + d.j; });
+			ll.exit().remove();
+			var newbars = ll.enter().append('g')
+				.attr('class', 'bar')
+				.attr('id', function(d) { return d.i + "," + d.j; })
+				.attr('clip-path', 'url(#hex)')
+				.attr('transform', function(d) { return 'translate(' + d.x + "," + d.y + ")"; });
+
+			ll.each(function(thishex) {
+				var thisbin = d3.select(this);
+				var thiscount = thishex.reduce(
+					function(p, d) { 
+						p[d[2]]++; return p;
+					}, Array(classNum).fill(0));
+					
+				var thisSum = thiscount.reduce(function(acc, val) {
+				  return acc + val;
+				}, 0);
+				//console.log(thisSum);
+
+				var bargrp = thisbin.selectAll('g.bargrp')
+					.data(thiscount);
+				bargrp.enter().append('g')
+					.attr('class', 'bargrp');
+
+				bargrp.each(function(count, i) {
+					// skip drawing lines if count == 0
+					//if (count == 0) return;
+
+					var thisgrp = d3.select(this);
+					var w = Math.abs(binRad* Math.cos(30/ Math.PI)*2/classNum)/2; //* Math.cos(30/ Math.PI);
+					var x = -w*classNum/2;//( (binRad - 0.5) )* Math.sin(angles[i]);
+					var y = binRad * Math.sin(30/classNum)/2;//( (binRad - 0.5) ) * Math.cos(angles[i]);
+
+					thisgrp.append('rect')
+							.attr({
+								'x': x + i*w,
+								'y': y - binRad* Math.sin(30/classNum)*count/thisSum,
+								'width': w,
+								'height': binRad* Math.sin(30/classNum)*count/thisSum
+								})
+							.style('fill', colors[i])
+							.style('stroke', 'black')
+							.style('stroke-width', 0.5);
+				});
+			});
+		});
+		
+	}
 
 	var updateVis = function(selectedIndex) {		
 		// TODO: It is better to do state change detection here, 
@@ -677,6 +749,8 @@ var Binning = (function() {
 		d3.selectAll('.binlines').remove();
 		// remove blocks
 		d3.selectAll(".binblocks").remove();
+		// remove bars
+		d3.selectAll(".bar").remove();
 
 		switch (selectedIndex) {
 			case VISTYPE.scatter: //scatterplot
@@ -721,6 +795,9 @@ var Binning = (function() {
 				break;
 			case VISTYPE.attrblk:
 				attrblkFunc();
+				break;
+			case VISTYPE.bar:
+				barFunc();
 				break;
 			default: // do nothing
 				break;
@@ -828,6 +905,10 @@ var Binning = (function() {
 
 	var bin_blocks = d3.selectAll('svg.pts > g')
 		.append('g').attr('class', 'blocks')
+		.attr('clip-path', 'url(#clip)');
+		
+	var bin_bar = d3.selectAll('svg.pts > g')
+		.append('g').attr('class', 'bars')
 		.attr('clip-path', 'url(#clip)');
 
 	var attenuation = d3.scale.log().range([0,1]);
