@@ -166,14 +166,13 @@ var Binning = (function() {
 		
 		// diverge here, remove baesd on # points, or # classes
 		hexbins.forEach(function(binPts){
-			var state = [];
-			for(var i = 0; i < binPts.length; i++) {
-				state.push({
-					remove: false,
-					selected: false,
-					isOutlier: false,
-				});
-			}
+			var thisPoints = binPts;
+			thisPoints.forEach(function(d) { 
+				d.remove = false;
+				d.selected = false;
+				d.isOutlier = false;
+			})
+			
 			var ptThreshold = 7;
 			if (visType === VISTYPE.pt2 || visType == VISTYPE.pt3) {
 				// try to select one of each class
@@ -197,14 +196,51 @@ var Binning = (function() {
 
 							if (minDist > maxDist) {
 								maxDist = minDist;
-								// leave here
-								//maxPt = state[]
+								maxPt = thisPt;
 							}
 						});
 						
-						
-						
+						var pickedPt = maxPt.each(function(d, i) {
+							d.selected = true;
+
+							// also mark as outlier if this is the only point of this class in this bin
+							if (thesePoints.size() == 1) 
+								d.isOutlier = true; 
+						});
 				});
+				
+				var shuf = shuffle(d3.range(binPts.length));
+					var order = {};
+					binPts.map(function(d) { return d[3]; })
+						.forEach(function(d, i) { order[d] = shuf[i]; });
+
+					// see if we can highlight any more points
+					binPts.sort(function(a,b) { 
+						return a.selected ?
+							(b.selected ? 0 : -1) :
+							(b.selected ? 1 : order[a[3]] - order[b[3]]);
+					});
+
+					binPts.forEach(function(curData, curI) { 
+						if (!curData.remove) {
+							binPts.each(function(d, i) {
+								if (eucliDist(d, curData) < ptThreshold && i != curI && !d.selected)
+									d.remove = true;
+							});
+						}
+					});
+				// leave here-----------------------------------------------------------------------------
+				// finally, actually remove the subsampled points
+				thisPoints.filter(function(d) { return !d.remove; });
+				d3.append('circle')
+					.data(thisPoints)
+					.attr('class', 'point')
+					.attr('r', 2)
+					.attr('cx', function(d) { return d[0]})
+					.attr('cy', function(d) { return d[1]})
+					.style('fill', function(d) { return colors[d[2]]; })
+					.style('stroke', '#333')
+					.style('stroke-width', '0.5px');
 			}
 			
 			
