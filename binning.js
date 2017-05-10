@@ -896,7 +896,7 @@ var Binning = (function() {
 		filename = document.getElementById("file").files[0].name;
 		//console.log(filename);
 		// TODO: require getting full path length
-		draw(filename);
+		// draw(filename);
 	}
 
 	function onlyUnique(value, index, self) { 
@@ -904,6 +904,15 @@ var Binning = (function() {
 	}
 
 	var obj_mapping = {};
+	var xcol = "x";
+	var ycol = "y";
+	var catcol = "category";
+	var setColName = function(x = "x",y="y",c="category"){
+		xcol = document.getElementById("myText1").value || x;
+		ycol = document.getElementById("myText2").value || y;
+		catcol = document.getElementById("myText3").value || c;
+		draw(filename);
+	}
 	var draw  = function(data_src, visChoice = null, binSize = null) {
 
 		// reset old dataset
@@ -911,7 +920,7 @@ var Binning = (function() {
 		ptId = 0;
 		
 		d3.csv(data_src, function(d) { 
-			return [+d.x, +d.y, d.category, ptId++]; 
+			return [+d[xcol], +d[ycol], d[catcol], ptId++]; //TODO: let user input their column name?
 		  }, function(error, rows) {
 			
 			// find min and max in the dataset to reset the domain of the vis
@@ -1045,6 +1054,7 @@ var Binning = (function() {
 	
 	return {
 		draw: draw,
-		getFileName: getFileName
+		getFileName: getFileName,
+		setColName: setColName
 	};
 })();

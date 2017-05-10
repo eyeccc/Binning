@@ -896,6 +896,17 @@ var Binning = (function() {
 		filename = document.getElementById("file").files[0].name;
 		//console.log(filename);
 		// TODO: require getting full path length
+		//draw(filename);
+		filename = "/uploads/" + filename;
+	}
+	
+	var xcol = "x";
+	var ycol = "y";
+	var catcol = "category";
+	var setColName = function(x = "x",y="y",c="category"){
+		xcol = document.getElementById("myText1").value || x;
+		ycol = document.getElementById("myText2").value || y;
+		catcol = document.getElementById("myText3").value || c;
 		draw(filename);
 	}
 
@@ -1045,6 +1056,7 @@ var Binning = (function() {
 	
 	return {
 		draw: draw,
-		getFileName: getFileName
+		getFileName: getFileName,
+		setColName: setColName
 	};
 })();
