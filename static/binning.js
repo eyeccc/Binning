@@ -15,7 +15,7 @@ var Binning = (function() {
 	};
 
 	var margins = {top: 20, right: 20, bottom: 40, left: 40};
-	var binRad = 15;
+	var binRad = 25;
 	var ptData = [];
 
 	/** adjust these number later ***/
@@ -96,34 +96,10 @@ var Binning = (function() {
 
 	var ptglyphFunc = function(visType) {
 		// try to move all points in binptsvg closer to center of their respective bins
-		
-		// TODO: instead of fetching scatter points and remove unnecessary ones
-		// Try to calculate all those behind the scene and only plot the necessary ones
+
 		hexbinFunc();
-		var pp = binpts_points.selectAll('g.pts')
-			.data(hexbins, function(d) { return d.i + "," + d.j; });
-		pp.exit().remove();
-		var newbin = pp.enter().append('g')
-			.attr('class', 'pts')
-			.attr('id', function(d) { return d.i + "," + d.j});
-
-		var newpp = pp.selectAll('circle.point')
-			.data(function(d) { return d; }, function(d) { return d[3]; });
-
-		newpp.exit().remove();
-		// this part draw everything
-		newpp.enter().append('circle')
-			.attr('class', 'point')
-			.attr('r', 2)
-			.attr('cx', function(d) { return d[0]})
-			.attr('cy', function(d) { return d[1]})
-			.style('fill', function(d) { return colors[d[2]]; })
-			.style('stroke', '#333')
-			.style('stroke-width', '0.5px');
-		
-		// use hexbins instead
-		// the last element in the array is the bin information
-		/*newpts = [];
+		// since we don't want to modify original data but want to keep all the information of each updated point
+		newobj = [];
 		for(var i = 0; i < hexbins.length; i++) {
 			var len = hexbins[i].length;
 			for(var j = 0; j < len; j++) {
@@ -132,89 +108,52 @@ var Binning = (function() {
 				var dist = Math.sqrt(unitpt.reduce(function(p, d) { return p + Math.pow(d,2); }, 0));
 				
 				var distThreshold = binRad / 2;
-				var pt = hexbins[i][j];
+				var ptx = hexbins[i][j][0];
+				var pty = hexbins[i][j][1];
 				if (dist > distThreshold) {
 					var newPos = unitpt.map(function(d) { return d * distThreshold / dist ; });
-					pt[0] = binCenter[0] + newPos[0];
-					pt[1] = binCenter[1] + newPos[1];
+					ptx= binCenter[0] + newPos[0];// bad to modify data
+					pty= binCenter[1] + newPos[1];
 				}
-				newpts.push(pt);
+				
+				newobj.push(	[ptx, pty, hexbins[i][j][2], hexbins[i][j][3]]);
 			}
 		}
-		var newppp = pp.selectAll('circle.point')
-			.data(newpts);
-		newppp.exit().remove();
-		
-		newppp.enter().append('circle')
-			.data(newpts)
-			.attr('class', 'point')
-			.attr('r', 2)
-			.attr('cx', function(d) { return d[0]})
-			.attr('cy', function(d) { return d[1]})
-			.style('fill', function(d) { return colors[d[2]]; })
-			.style('stroke', '#333')
-			.style('stroke-width', '0.5px');
+		var newhexbins = hexbin(newobj);
+		var pp = binpts_points.selectAll('g.pts')
+			.data(newhexbins, function(d) { return d.i + "," + d.j; });
+		pp.exit().remove();
+		var newbin = pp.enter().append('g')
+			.attr('class', 'pts')
+			.attr('id', function(d) { return d.i + "," + d.j});
+		var newpp = pp.selectAll('circle.point')
+			.data(function(d) { return d; }, function(d) { return d[3]; });
 
-		newpp.enter().append('circle')
-			.attr('class', 'point')
-			.attr('r', 2)
-			.attr('cx', function(d) { return d[0]})
-			.attr('cy', function(d) { return d[1]})
-			.style('fill', function(d) { return colors[d[2]]; })
-			.style('stroke', '#333')
-			.style('stroke-width', '0.5px');*/
-		
-		// try moving points closer to the origin of their bins??
-		newpp.each(function(pData, i) {
-			pData.remove = false;
-			pData.selected = false;
-			var pt = d3.select(this);
-
-			// is bin too far from center?
-			var binCenter = d3.select(pt.node().parentNode).data().map(function(d) { return [d.x, d.y]})[0];
-			var unitpt = binCenter.map(function(d, i) { return pData[i] - d; });
-			var dist = Math.sqrt(unitpt.reduce(function(p, d) { return p + Math.pow(d,2); }, 0));
-
-			var distThreshold = binRad / 2;
-			if (dist > distThreshold) {
-				var newPos = unitpt.map(function(d) { return d * distThreshold / dist ; });
-				pt.attr('cx', binCenter[0] + newPos[0])
-					.attr('cy', binCenter[1] + newPos[1]);
-			}
-		});
-		
+		newpp.exit().remove();
 		// diverge here, remove baesd on # points, or # classes
-		binpts_points.each(function(d, i) {
-			var thisSVG = d3.select(this);
-			var thisID = d3.select(thisSVG.node().parentNode.parentNode).attr('id');
-			var thisPoints = thisSVG.selectAll('g.pts').selectAll('circle.point');
-
-			// reset point state (since it's shared because we set it all at once??)
-			thisPoints.each(function(d) { 
+		newhexbins.forEach(function(binPts){
+			var thisPoints = binPts;
+			thisPoints.forEach(function(d) { 
 				d.remove = false;
 				d.selected = false;
 				d.isOutlier = false;
 			})
 			
 			var ptThreshold = 7;
-			if (visType === VISTYPE.pt2 || visType == VISTYPE.pt3) {
+			if (visType == VISTYPE.pt2 || visType == VISTYPE.pt3) {
 				// try to select one of each class
-				thisPoints.forEach(function(binData, binID) {
-					var binPts = d3.selectAll(binData);
-					var binClasses = d3.set(binPts.data().map(function(d) { return d[2]; })).values();
+				var binClasses = d3.set(binPts.map(function(d) { return d[2]; })).values();
 
-					binClasses.forEach(function(thisClass) {
+				binClasses.forEach(function(thisClass) {
 						var thesePoints = binPts.filter(function(d) { return d[2] == thisClass; });
-
 						// try to pick the index farthest away from everything else
 						var thosePoints = binPts.filter(function(d) { return d[2] != thisClass; });
 						
 						var maxPt;
 						var maxDist = -Infinity;
-						// select the point that has the highest distance from everything else
-						thesePoints.each(function(thisPt) {
+						thesePoints.forEach(function(thisPt) {
 							var minDist = Infinity;
-							thosePoints.each(function(thatPt) {
+							thosePoints.forEach(function(thatPt) {
 								var dist = eucliDist(thisPt, thatPt); 
 								if (dist < minDist) {
 									minDist = dist;
@@ -223,22 +162,19 @@ var Binning = (function() {
 
 							if (minDist > maxDist) {
 								maxDist = minDist;
-								maxPt = d3.select(this);
+								maxPt = thisPt;
 							}
 						});
-
-						var pickedPt = maxPt.each(function(d, i) {
-							d.selected = true;
-
-							// also mark as outlier if this is the only point of this class in this bin
-							if (thesePoints.size() == 1) 
-								d.isOutlier = true; 
-						});
-					});
-
-					var shuf = shuffle(d3.range(binPts.data().length));
+						
+						maxPt.selected = true;
+						if (thesePoints.length == 1) 
+								maxPt.isOutlier = true; 
+				});
+				
+				// some problem here
+				var shuf = shuffle(d3.range(binPts.length));
 					var order = {};
-					binPts.data().map(function(d) { return d[3]; })
+					binPts.map(function(d) { return d[3]; })
 						.forEach(function(d, i) { order[d] = shuf[i]; });
 
 					// see if we can highlight any more points
@@ -248,62 +184,101 @@ var Binning = (function() {
 							(b.selected ? 1 : order[a[3]] - order[b[3]]);
 					});
 
-					binPts.each(function(curData, curI) { 
+					binPts.forEach(function(curData, curI) { 
 						if (!curData.remove) {
-							binPts.each(function(d, i) {
-								if (eucliDist(d, curData) < ptThreshold && i != curI && !d.selected)
+							binPts.forEach(function(d, i) {
+								if (eucliDist(d, curData) < ptThreshold && i != curI && !d.selected && !d.isOutlier)
 									d.remove = true;
+									
 							});
 						}
 					});
-				});
-
+				// leave here-----------------------------------------------------------------------------
 				// finally, actually remove the subsampled points
-				thisPoints.filter(function(d) { return d.remove; }).remove();
+				// did not really remove anything
+				if(visType == VISTYPE.pt2){
+					var plotpts = thisPoints.filter(function(d) { return !d.remove; });
+				
+					plotpts.forEach(function(d){
+						d3.select('svg').append('circle')
+						.attr('class', 'point')
+						.attr('id', d[3])
+						.attr('transform','translate(40,20)')
+						.attr('r', 2)
+						.attr('cx', d[0])
+						.attr('cy', d[1])
+						.style('fill', colors[d[2]])
+						.style('stroke', '#333')
+						.style('stroke-width', '0.5px');
 
-				// identify points that are single outliers and replace them with crosses
-				var cross = d3.svg.symbol().type("triangle-up").size(10);
-				if (visType === VISTYPE.pt3) {
-					thisPoints.filter(function(d) { return !!d.isOutlier; }).forEach(function(grpOutliers) {
-						theseOutliers = d3.selectAll(grpOutliers).each(function(d) {
-							var thisPt = d3.select(this);
-							d3.select(thisPt.node().parentNode).append('path')
-								.attr('class', 'outlier')
-								.attr('transform', 'translate('+thisPt.attr('cx')+','+thisPt.attr('cy')+')')
-								.attr('d', cross)
-								.style('fill', colors[d[2]])
-								.style('stroke', '#333')
-								.style('stroke-width', '0.5px');
-							thisPt.style('opacity', '0');
-						});
+					});
+				}else if(visType == VISTYPE.pt3) {
+					var cross = d3.svg.symbol().type("triangle-up").size(10);
+					var plotpts = thisPoints.filter(function(d) { return !d.remove; });
+					var outliers = thisPoints.filter(function(d){return d.isOutlier;});
+					plotpts = plotpts.filter(function(d){return !d.isOutlier;});
+				
+					plotpts.forEach(function(d){
+						d3.select('svg').append('circle')
+						.attr('class', 'point')
+						.attr('id', d[3])
+						.attr('r', 2)
+						.attr('transform','translate(40,20)')
+						.attr('cx', d[0])
+						.attr('cy', d[1])
+						.style('fill', colors[d[2]])
+						.style('stroke', '#333')
+						.style('stroke-width', '0.5px');
+
+					});
+
+					outliers.forEach(function(d){
+						var x = 40+d[0];
+						var y = 20+d[1];
+						d3.select('svg').append('path')
+						.attr('class', 'point outlier')
+						.attr('transform','translate('+x+','+y+')')
+						.attr('id', 'o'+d[3])
+						.attr('d', cross)
+						.style('fill', colors[d[2]])
+						.style('stroke', '#333')
+						.style('stroke-width', '0.5px');
+
 					});
 				}
-
-			} else if (visType === VISTYPE.pt1) {
-				// subsample.  just flag points, then remove all that conflict
-				thisPoints.forEach(function(binData, binID) {
-					var order = shuffle(d3.range(binData.length));
-					var binPts = d3.selectAll(binData);
-					order.forEach(function(i) {
-						var curPt = d3.select(binData[i]);
-						var curData = curPt.datum();
-
-						// if point has not already been marked to remove, remove its neighbors
-						if (!curData.remove) {
-							// select all points except the current one that are within 2px and remove them
-							binPts.each(function(d, thisI) { 
-								if (eucliDist(d, curData) < ptThreshold && thisI != i)
-									d.remove = true; 
-							});
-						}
-					});
+				
+				
+			}else if(visType == VISTYPE.pt1){
+				var order = shuffle(d3.range(thisPoints.length));
+				order.forEach(function(i){
+					var curPt = thisPoints[i];
+					if(!curPt.remove) {
+						thisPoints.forEach(function(pt, idx){
+							if (eucliDist(pt, curPt) < ptThreshold && idx != i)
+									pt.remove = true; 
+						});
+						
+					}
 				});
 
 				// finally, actually remove the subsampled points
-				thisPoints.filter(function(d) { return d.remove; }).remove();
-			} else 
-				throw "unimplemented subsampling routing for svg#" + thisID;
-		});
+				//thisPoints.filter(function(d) { return d.remove; }).remove();
+				var plotpts = thisPoints.filter(function(d) { return !d.remove; });
+				
+					plotpts.forEach(function(d){
+						d3.select('svg').append('circle')
+						.attr('class', 'point')
+						.attr('id', d[3])
+						.attr('transform','translate(40,20)')
+						.attr('r', 2)
+						.attr('cx', d[0])
+						.attr('cy', d[1])
+						.style('fill', colors[d[2]])
+						.style('stroke', '#333')
+						.style('stroke-width', '0.5px');
+					});
+			}
+		}) ;
 	}
 
 	var binpieFunc = function(visType) {
@@ -741,6 +716,7 @@ var Binning = (function() {
 		d3.selectAll(".outlier").remove();
 		// remove pies
 		d3.selectAll(".pie").remove();
+		d3.selectAll(".point").remove();
 		// clear canvas
 		d3.selectAll('canvas')
 			.attr('width', width)
