@@ -666,7 +666,7 @@ var Binning = (function() {
 					function(p, d) { 
 						p[d[2]]++; return p;
 					}, Array(classNum).fill(0));
-					
+				//var thisClassNum = thiscount.filter(function(d){return d > 0;}).length;
 				var thisSum = thiscount.reduce(function(acc, val) {
 				  return acc + val;
 				}, 0);
@@ -684,14 +684,14 @@ var Binning = (function() {
 					var thisgrp = d3.select(this);
 					var w = Math.abs(binRad* Math.cos(30/ Math.PI)*2/classNum)/2; //* Math.cos(30/ Math.PI);
 					var x = -w*classNum/2;//( (binRad - 0.5) )* Math.sin(angles[i]);
-					var y = Math.abs(binRad * Math.cos(30/classNum)/2);//( (binRad - 0.5) ) * Math.cos(angles[i]);
+					var y = Math.abs(binRad * Math.cos(30/ Math.PI))/2;//( (binRad - 0.5) ) * Math.cos(angles[i]);
 
 					thisgrp.append('rect')
 							.attr({
 								'x': x + i*w,
-								'y': y - Math.abs(binRad* Math.cos(30/classNum)*count/thisSum),
+								'y': y - Math.abs(binRad* Math.cos(30/ Math.PI)*count/thisSum),
 								'width': w,
-								'height': Math.abs(binRad* Math.cos(30/classNum)*count/thisSum)
+								'height': Math.abs(binRad* Math.cos(30/ Math.PI)*count/thisSum)
 								})
 							.style('fill', colors[i])
 							.style('stroke', 'black')
