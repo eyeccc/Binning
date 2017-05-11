@@ -893,11 +893,13 @@ var Binning = (function() {
 	var ptId = 0;
 	var filename = "cluster-data.csv";
 	var getFileName = function() {
-		filename = document.getElementById("file").files[0].name;
+		curfilename = document.getElementById("file").files[0].name;
 		//console.log(filename);
 		// TODO: require getting full path length
 		//draw(filename);
-		filename = "/uploads/" + filename;
+		filename = curfilename 
+						? "/uploads/" + curfilename
+						: filename;
 	}
 	
 	var xcol = "x";
@@ -915,8 +917,8 @@ var Binning = (function() {
 	}
 
 	var obj_mapping = {};
-	var draw  = function(data_src, visChoice = null, binSize = null) {
-
+	var draw  = function(data_src=null, visChoice = null, binSize = null) {
+		filename = data_src || filename
 		// reset old dataset
 		ptData = []; 
 		ptId = 0;
@@ -960,19 +962,25 @@ var Binning = (function() {
 					.attr('width', '600px')
 					.attr('height', '100px');
 					
+			var y_offset = 0;
+			//var x_offset = 100;
 			for(var i = 0; i < classNum; i++) {
 				newsvg.append('rect')
 						.attr('class', 'label')
-						.attr('x', i*100+ 100)
+						.attr('x', (i%5)*100+ 100)
+						.attr('y',  y_offset)
 						.attr('width', '10px')
 						.attr('height', '10px')
 						.attr('fill', colors[i]);
 				newsvg.append('text')
 							.attr('class', 'label')
-							.attr('x', i*100+ 130)
-							.attr('y', 12)
+							.attr('x', (i%5)*100+ 130)
+							.attr('y', 12 + y_offset)
 							.style('fill', 'black')
 							.text(uniqueClass[i]);
+				if(i % 5 == 4) {
+					y_offset += 20;
+				}
 			}	
 			var xd_int = xmax - xmin;
 			var yd_int = ymax - ymin;
