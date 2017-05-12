@@ -9,7 +9,7 @@ import os
 # browser the file that the user just uploaded
 
 # Uncomment this part to set the working directory to where this script runs
-os.chdir('C:\Users\ching\Desktop\Binning')
+#os.chdir('C:\Users\ching\Desktop\Binning')
 
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug import secure_filename
