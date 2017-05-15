@@ -85,6 +85,14 @@ h1 {
 	<h3>Notice: This application works best for datasets with less than 10 classes.</h3>
 	<div class="funcbox">
 	<div>
+		Sample datasets:
+		<select id = "sampleOpts" autocomplete="off">
+			<option value="cluster-data.csv" selected="selected">Default random points (4 classes)</option>
+			<option value="nba-data.csv">nba shooting position dataset (5 classes)</option> 
+			<option value="lda-data.csv">lda dataset (9 classes)</option> 
+		</select>
+	</div>
+	<div>
 	Upload dataset (only support csv):
 		<form action="upload" method="post" enctype="multipart/form-data">
         <input type="file" name="file">
@@ -183,6 +191,9 @@ h1 {
 		
 	</script>
 	<div id="label-container"></div>
+	<div id="description" width="600px" height="100px" style="background-color:beige; padding: 10px 10px 10px 10px;">
+	Description:
+	</div>
 	<div id="png-container"></div>
 	<canvas id="destCanvas"></canvas>
 
