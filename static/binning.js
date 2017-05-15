@@ -720,17 +720,9 @@ var Binning = (function() {
 	var updateVis = function(selectedIndex) {		
 		// TODO: It is better to do state change detection here, 
 		// so we don't need to redraw everytime we change the dropdown list
-		d3.select("#description").append("p").text("New paragraph!");
-		/*if(document.getElementById("description")) {
-			d3.select("#description").append("p").text("New paragraph!");
-			//d3.select("#description").append("p");
-			var node = document.createElement("p"); 
-			//var text = "Description: \n" + des[selectedIndex];
-			var textnode = document.createTextNode(des[selectedIndex]); 
-			node.appendChild(textnode);
-			document.getElementById("description").innerHTML = "";
-			document.getElementById("description").appendChild(node);
-		}*/
+		d3.select("#description p").remove();
+		d3.select("#description").append("p").text(des[selectedIndex]);
+
 		// remove all hexagons
 		d3.selectAll(".hexagons  path").remove();
 		// remove all points from scatter plot
