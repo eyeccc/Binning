@@ -133,6 +133,17 @@ h1 {
 			"/uploads/" + params['filename'] : 
 			"{{ url_for('static', filename='cluster-data.csv') }}";
 		Binning.draw(file);
+		
+		d3.select('#sampleOpts')
+		.on('change',dropdownChangeData);
+		
+		function dropdownChangeData () {
+			var e = document.getElementById("sampleOpts");
+			var dataset = "static/"+e.value;
+			//var data = document.getElementById("sampleOpts");
+			//console.log(data);
+			Binning.draw(dataset);
+		}
 		// fix this part
 		// from: http://bl.ocks.org/biovisualize/8187844
 		function printPDF()  {

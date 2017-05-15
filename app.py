@@ -19,6 +19,8 @@ app = Flask(__name__)
 
 # This is the path to the upload directory
 app.config['UPLOAD_FOLDER'] = 'uploads/'
+# This is the path to the sample datasets directory
+app.config['SAMPLE_FOLDER'] = 'samples/'
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['csv'])
 
