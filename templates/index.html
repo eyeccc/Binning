@@ -90,6 +90,7 @@ h1 {
 			<option value="cluster-data.csv" selected="selected">Default random points (4 classes)</option>
 			<option value="nba-data.csv">nba shooting position dataset (5 classes)</option> 
 			<option value="lda-data.csv">lda dataset (9 classes)</option> 
+			<option value="lsa-data.csv">lsa dataset (9 classes)</option> 
 		</select>
 	</div>
 	<div>
@@ -127,6 +128,11 @@ h1 {
 	<div>Adjust your bin size: <input type="range" id="myRange" value="15" min="10" max="100" autocomplete="off"></div>
 	<div class="tooltip">Generate png of the current design: <input type="button" id="btnSave" value="generate" onClick="printPDF()"/> 
 	<span class="tooltiptext">Please click on the generated image under the original visualization to save files.</span> 
+	</div>
+	<div style="margin-top:10px;">
+	Description:
+	<div id="description" max-width="600px" height="100px" style="background-color:lightblue; padding: 10px 10px 10px 10px;width:580px;border-radius:10px">
+	</div>
 	</div>
 	</div>
 		<script src="https://d3js.org/d3.v3.min.js"></script>
@@ -191,9 +197,6 @@ h1 {
 		
 	</script>
 	<div id="label-container"></div>
-	<div id="description" width="600px" height="100px" style="background-color:beige; padding: 10px 10px 10px 10px;">
-	Description:
-	</div>
 	<div id="png-container"></div>
 	<canvas id="destCanvas"></canvas>
 
