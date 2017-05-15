@@ -1,49 +1,40 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-
 body {
     display: block;  /*might want to change to other style*/
     flex-flow: row wrap;
     justify-content: space-around;
     font-family: sans-serif;
 }
-
 .canvasContainer {
     position: relative;
 }
-
 .canvasContainer canvas, .canvasContainer svg {
     position: absolute;
     top: 0;
     left: 0;
 }
-
 .canvasContainer svg {
     z-index: 10;
 }
-
 .canvasContainer .hexagons > path {
   fill: none;
   stroke: #fff;
   stroke-width: 1px;
 }
-
 .axis text {
   font: 10px sans-serif;
 }
-
 .axis path,
 .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
 }
-
 h1 {
 	display: block;
 }
-
 .funcbox {
 	background-color: beige;
     padding-top: 10px;
@@ -53,7 +44,6 @@ h1 {
     border-radius: 10px;
     max-width: 600px;
 }
-
 .tooltiptext {
     visibility: hidden;
     /* width: 120px; */
@@ -65,11 +55,9 @@ h1 {
     position: absolute;
     z-index: 1;
 }
-
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
-
 </style>
 <head>
 	<title>Exploration of Different Types of Binning</title>
@@ -84,15 +72,6 @@ h1 {
 	<h1>Exploration of Different Types of Binning</h1>
 	<h3>Notice: This application works best for datasets with less than 10 classes.</h3>
 	<div class="funcbox">
-	<div>
-		Sample datasets:
-		<select id = "sampleOpts" autocomplete="off">
-			<option value="cluster-data.csv" selected="selected">Default random points (4 classes)</option>
-			<option value="nba-data.csv">nba shooting position dataset (5 classes)</option> 
-			<option value="lda-data.csv">lda dataset (9 classes)</option> 
-			<option value="lsa-data.csv">lsa dataset (9 classes)</option> 
-		</select>
-	</div>
 	<div>
 	Upload dataset (only support csv):
 		<form action="upload" method="post" enctype="multipart/form-data">
@@ -129,11 +108,6 @@ h1 {
 	<div class="tooltip">Generate png of the current design: <input type="button" id="btnSave" value="generate" onClick="printPDF()"/> 
 	<span class="tooltiptext">Please click on the generated image under the original visualization to save files.</span> 
 	</div>
-	<div style="margin-top:10px;">
-	Description:
-	<div id="description" max-width="600px" height="100px" style="background-color:lightblue; padding: 10px 10px 10px 10px;width:580px;border-radius:10px">
-	</div>
-	</div>
 	</div>
 		<script src="https://d3js.org/d3.v3.min.js"></script>
 		<script src="{{ url_for('static', filename='d3.hexbin.min.js') }}"></script>
@@ -149,7 +123,6 @@ h1 {
 		// from: http://bl.ocks.org/biovisualize/8187844
 		function printPDF()  {
 			var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
-
 			var canvas = document.getElementById("canvastest");
 			var destCanvas = document.getElementById("destCanvas");
 			var ctx = canvas.getContext("2d");
@@ -172,25 +145,20 @@ h1 {
 			};
 			img.src = url;
 		}
-
 		function get_params(search_string) {
-
 		  var parse = function(params, pairs) {
 		    var pair = pairs[0];
 		    var parts = pair.split('=');
 		    var key = decodeURIComponent(parts[0]);
 		    var value = decodeURIComponent(parts.slice(1).join('='));
-
 		    // Handle multiple parameters of the same name
 		    if (typeof params[key] === "undefined") {
 		      params[key] = value;
 		    } else {
 		      params[key] = [].concat(params[key], value);
 		    }
-
 		    return pairs.length == 1 ? params : parse(params, pairs.slice(1))
 		  }
-
 		  // Get rid of leading ?
 		  return search_string.length == 0 ? {} : parse({}, search_string.substr(1).split('&'));
 		}
