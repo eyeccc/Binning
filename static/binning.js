@@ -47,6 +47,21 @@ var Binning = (function() {
 			updateVis(selectedIndex);
 		}
 	}
+	
+	var des = [
+	"This is a normal 2D scatterplot.",
+	"This is a hexigonal grid using color blending technique. The background color of each bin is the mixture of colors according to weighted sum of different classes.",
+	"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled.",
+	"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled. However, at least one point of existing class inside each bin will be shown.",
+	"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled. However, at least one point of existing class inside each bin will be shown. If the point is outlier, it is shown as a triangle.",
+	"This is a hexigonal grid with pie charts. The background color of each bin shows the density. The pie chart within each bin shows the proportion of different classes in that bin.",
+	"This is a hexigonal grid with pie charts. The size of each pie chart encodes the density/numerosity within each bin. The pie chart itself shows the proportion of different classes in that bin.",
+	"This is a hexigonal grid using color weaving technique. The background color of each bin shows the color of the majority class within that bin. Weaving technique randomly positions color pixels to show summary and porportion of classes within each bin.",
+	"This is a hexigonal grid using color weaving technique. It shows density of each bin, i.e., the whiter the sparser. Weaving technique randomly positions color pixels to show summary and porportion of classes within each bin.",
+	"This is a hexigonal grid using color+angle. Both color and angle encode class identity. Number of lines are calculated by each classes. Thus, more lines with one color does not necessarily more points than another color.",
+	"This is a hexigonal grid using attribute blocks technique. Position and color within each bin both encode class identity. The numerosity of each class within a bin is shown by different color intensity. If the color is lighter, it means points of that class are less.",
+	"This is a hexigonal grid with bar chart glyph. Bar chart within each bin shows proportion of different classes within that bin. The order of bars is sorted by class label not by numerosity."
+	];
 
 	// track event change (dropdown menu selection change)
 	d3.select('#opts')
@@ -75,7 +90,7 @@ var Binning = (function() {
 					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 				hex.style("fill", 
 					function(d) { 
-						var counts = [0,0,0,0];
+						var counts = Array(classNum).fill(0);
 						d.forEach(function(p) {
 							counts[p[2]]++;
 						});
@@ -705,7 +720,17 @@ var Binning = (function() {
 	var updateVis = function(selectedIndex) {		
 		// TODO: It is better to do state change detection here, 
 		// so we don't need to redraw everytime we change the dropdown list
-		
+		d3.select("#description").append("p").text("New paragraph!");
+		/*if(document.getElementById("description")) {
+			d3.select("#description").append("p").text("New paragraph!");
+			//d3.select("#description").append("p");
+			var node = document.createElement("p"); 
+			//var text = "Description: \n" + des[selectedIndex];
+			var textnode = document.createTextNode(des[selectedIndex]); 
+			node.appendChild(textnode);
+			document.getElementById("description").innerHTML = "";
+			document.getElementById("description").appendChild(node);
+		}*/
 		// remove all hexagons
 		d3.selectAll(".hexagons  path").remove();
 		// remove all points from scatter plot
