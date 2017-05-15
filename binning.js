@@ -1014,8 +1014,8 @@ var Binning = (function() {
 			}	
 			var xd_int = xmax - xmin;
 			var yd_int = ymax - ymin;
-			xd = [Math.floor(xmin), Math.ceil(xmax + xd_int/20) ];
-			yd = [Math.floor(ymin), Math.ceil(ymax + yd_int/20)];
+			xd = [xmin - xd_int/20, xmax+xd_int/20 ];
+			yd = [ymin - yd_int/20, ymax+yd_int/20];
 			x1 = d3.scale.linear()
 				.domain(xd)
 				.range([0, width]);
