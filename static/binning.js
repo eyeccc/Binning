@@ -973,18 +973,8 @@ var Binning = (function() {
 		  }, function(error, rows) {
 			try {
 				if(!ourRange)  {
-					xmin = Math.min.apply(Math, rows.map(function(v) {
-					  return v[0];
-					}));
-					xmax = Math.max.apply(Math, rows.map(function(v) {
-					  return v[0];
-					}));
-					ymin = Math.min.apply(Math, rows.map(function(v) {
-					  return v[1];
-					}));
-					ymax = Math.max.apply(Math, rows.map(function(v) {
-					  return v[1];
-					}));
+					[xmin, xmax] = d3.extent(rows, function(d){return d[0]});
+					[ymin, ymax] = d3.extent(rows, function(d){return d[1]});
 				}
 			} catch(err) {
 				console.log(err);
