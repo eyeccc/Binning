@@ -50,8 +50,13 @@ var Binning = (function() {
 	
 	var des = [
 	"This is a normal 2D scatterplot.",
-	"This is a hexigonal grid using color blending technique. The background color of each bin is the mixture of colors according to weighted sum of different classes.",
-	"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled.",
+	"This is a hexigonal grid using color blending technique." +
+	"The background color of each bin is the mixture of colors"+
+	" according to weighted sum of different classes.",
+	"This is a hexigonal grid with point glyph."+
+	" The background color of each bin is the mixture of colors "+
+	"according to weighted sum of different classes."+
+	" Points overlay on top of each bin are random sampled.",
 	"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled. However, at least one point of existing class inside each bin will be shown.",
 	"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled. However, at least one point of existing class inside each bin will be shown. If the point is outlier, it is shown as a triangle.",
 	"This is a hexigonal grid with pie charts. The background color of each bin shows the density. The pie chart within each bin shows the proportion of different classes in that bin.",
@@ -928,11 +933,32 @@ var Binning = (function() {
 	var xmax = 10;
 	var ymin = 0;
 	var ymax = 10;
+	var ourRange = false;
 	
-	var setColName = function(x = "x",y="y",c="category"){
-		xcol = document.getElementById("myText1").value || x;
-		ycol = document.getElementById("myText2").value || y;
-		catcol = document.getElementById("myText3").value || c;
+	var setColName = function(
+		x = "x",
+		y="y",
+		c="category",
+		x1=0,
+		x2=10,
+		y1 =0,
+		y2=10,
+	){
+		xcol =  x;
+		ycol =  y;
+		catcol = c;
+		
+		xmin = x1 != "optional" ? parseFloat(x1) : xmin;
+		xmax = x2 != "optional" ?parseFloat(x2) :xmax;
+		ymin = y1 != "optional" ?parseFloat(y1):ymin;
+		ymax = y2 != "optional" 	?	parseFloat(y2):ymax;
+				
+		if (x1 != "optional" || x2 != "optional" || y1 != "optional" || y2 != "optional" ){
+			ourRange = true;
+		}else{
+			ourRange = false;
+		} 
+
 		draw(filename);
 	}
 
@@ -946,21 +972,25 @@ var Binning = (function() {
 			return [+d[xcol], +d[ycol], d[catcol], ptId++]; //TODO: let user input their column name?
 		  }, function(error, rows) {
 			try {
-				xmin = Math.min.apply(Math, rows.map(function(v) {
-				  return v[0];
-				}));
-				xmax = Math.max.apply(Math, rows.map(function(v) {
-				  return v[0];
-				}));
-				ymin = Math.min.apply(Math, rows.map(function(v) {
-				  return v[1];
-				}));
-				ymax = Math.max.apply(Math, rows.map(function(v) {
-				  return v[1];
-				}));
+				if(!ourRange)  {
+					xmin = Math.min.apply(Math, rows.map(function(v) {
+					  return v[0];
+					}));
+					xmax = Math.max.apply(Math, rows.map(function(v) {
+					  return v[0];
+					}));
+					ymin = Math.min.apply(Math, rows.map(function(v) {
+					  return v[1];
+					}));
+					ymax = Math.max.apply(Math, rows.map(function(v) {
+					  return v[1];
+					}));
+				}
 			} catch(err) {
 				console.log(err);
 				console.log("Using default size range. [0, 10]");
+				xmin = 0; ymin = 0;
+				xmax = 10; ymax = 10;
 			}
 			
 			// This part is not very efficient though

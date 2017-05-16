@@ -89,11 +89,15 @@ h1 {
       </form>
 	</div>
 	<div style="margin-top:10px;margin-bottom:10px;">
-		Click the button to set up column names in your csv file.<br>
+		Click the button to set up column names and data range in your csv file.<br>
 		x: <input type="text" id="myText1" value="x"><br>
 		y: <input type="text" id="myText2" value="y"><br>
 		category: <input type="text" id="myText3" value="category"><br>
-		<button onclick="Binning.setColName()">Set and Draw</button>
+		x_min: <input type="text" id="myText4" value="optional"><br>
+		x_max: <input type="text" id="myText5" value="optional"><br>
+		y_min: <input type="text" id="myText6" value="optional"><br>
+		y_max: <input type="text" id="myText7" value="optional"><br>
+		<button onclick="setColumnAndRange">Set and Draw</button>
 	</div>
 	<!-- all possible options -->
 	<div class="dropdown">
@@ -142,7 +146,31 @@ h1 {
 			var dataset = "static/"+e.value;
 			//var data = document.getElementById("sampleOpts");
 			//console.log(data);
+			resetValue();
 			Binning.draw(dataset);
+		}
+		
+		function setColAndRange() {
+			var xcol = document.getElementById("myText1").value;
+			var ycol = document.getElementById("myText2").value;
+			var catcol = document.getElementById("myText3").value;
+			
+			var xmin = document.getElementById("myText4").value;
+			var xmax = document.getElementById("myText5").value;
+			var ymin = document.getElementById("myText6").value;
+			var ymax = document.getElementById("myText7").value;
+
+			Binning.setColName(xcol, ycol, catcol, xmin, xmax, ymin, ymax);
+		}
+		function resetValue() {
+			document.getElementById("myText1").value = "x";
+			document.getElementById("myText2").value = "y";
+			document.getElementById("myText3").value = "category";
+			document.getElementById("myText4").value = "optional";
+			document.getElementById("myText5").value = "optional";
+			document.getElementById("myText6").value = "optional";
+			document.getElementById("myText7").value = "optional";
+			Binning.setColName();
 		}
 		// fix this part
 		// from: http://bl.ocks.org/biovisualize/8187844

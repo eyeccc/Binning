@@ -55,6 +55,7 @@ var Binning = (function() {
 		var dataset = "samples/" + e.value;
 		//var data = document.getElementById("sampleOpts");
 		//console.log(data);
+		resetValue();
 		draw(dataset);
 	}
 
@@ -924,6 +925,21 @@ var Binning = (function() {
 		//console.log(filename);
 		// TODO: require getting full path length
 		// draw(filename);
+		// Reset everything
+		resetValue();
+	}
+	
+	var resetValue = function() {
+		xmin=0; ymin=0;
+		xmax=10; ymax=10;
+		ourRange=false;
+		document.getElementById("myText1").value = "x";
+		document.getElementById("myText2").value = "y";
+		document.getElementById("myText3").value = "category";
+		document.getElementById("myText4").value = "optional";
+		document.getElementById("myText5").value = "optional";
+		document.getElementById("myText6").value = "optional";
+		document.getElementById("myText7").value = "optional";
 	}
 
 	function onlyUnique(value, index, self) { 
@@ -938,10 +954,41 @@ var Binning = (function() {
 	var xmax = 10;
 	var ymin = 0;
 	var ymax = 10;
-	var setColName = function(x = "x",y="y",c="category"){
+	var ourRange = false;
+	var setColName = function(
+		x = "x",
+		y="y",
+		c="category",
+		x1=0,
+		x2=10,
+		y1 =0,
+		y2=10,
+	){
 		xcol = document.getElementById("myText1").value || x;
 		ycol = document.getElementById("myText2").value || y;
 		catcol = document.getElementById("myText3").value || c;
+		
+		xmin = document.getElementById("myText4").value != "optional" 
+				?	parseFloat(document.getElementById("myText4").value)
+				:	(x1 || xmin);
+		xmax = document.getElementById("myText5").value != "optional" 
+				?	parseFloat(document.getElementById("myText5").value)
+				:	(x2 || xmax);
+		ymin = document.getElementById("myText6").value != "optional" 
+				?	parseFloat(document.getElementById("myText6").value)
+				:	(y1 || ymin);
+		ymax = document.getElementById("myText7").value != "optional" 
+				?	parseFloat(document.getElementById("myText7").value)
+				:	(y2||ymax);
+				
+		if (document.getElementById("myText4").value != "optional" ||
+			document.getElementById("myText5").value != "optional" ||
+			document.getElementById("myText6").value != "optional" ||
+			document.getElementById("myText7").value != "optional" 
+		){
+			ourRange = true;
+		} 
+
 		draw(filename);
 	}
 
@@ -957,21 +1004,25 @@ var Binning = (function() {
 			
 			// find min and max in the dataset to reset the domain of the vis
 			try {
-				xmin = Math.min.apply(Math, rows.map(function(v) {
-				  return v[0];
-				}));
-				xmax = Math.max.apply(Math, rows.map(function(v) {
-				  return v[0];
-				}));
-				ymin = Math.min.apply(Math, rows.map(function(v) {
-				  return v[1];
-				}));
-				ymax = Math.max.apply(Math, rows.map(function(v) {
-				  return v[1];
-				}));
+				if(!ourRange)  {
+					xmin = Math.min.apply(Math, rows.map(function(v) {
+					  return v[0];
+					}));
+					xmax = Math.max.apply(Math, rows.map(function(v) {
+					  return v[0];
+					}));
+					ymin = Math.min.apply(Math, rows.map(function(v) {
+					  return v[1];
+					}));
+					ymax = Math.max.apply(Math, rows.map(function(v) {
+					  return v[1];
+					}));
+				}
 			} catch(err) {
 				console.log(err);
 				console.log("Using default size range. [0, 10]");
+				xmin = 0; ymin = 0;
+				xmax = 10; ymax = 10;
 			}
 			
 			// This part is not very efficient though
