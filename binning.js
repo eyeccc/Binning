@@ -934,12 +934,17 @@ var Binning = (function() {
 	var xcol = "x";
 	var ycol = "y";
 	var catcol = "category";
+	var xmin = 0;
+	var xmax = 10;
+	var ymin = 0;
+	var ymax = 10;
 	var setColName = function(x = "x",y="y",c="category"){
 		xcol = document.getElementById("myText1").value || x;
 		ycol = document.getElementById("myText2").value || y;
 		catcol = document.getElementById("myText3").value || c;
 		draw(filename);
 	}
+
 	var draw  = function(data_src, visChoice = null, binSize = null) {
 
 		// reset old dataset
@@ -951,18 +956,23 @@ var Binning = (function() {
 		  }, function(error, rows) {
 			
 			// find min and max in the dataset to reset the domain of the vis
-			var xmin = Math.min.apply(Math, rows.map(function(v) {
-			  return v[0];
-			}));
-			var xmax = Math.max.apply(Math, rows.map(function(v) {
-			  return v[0];
-			}));
-			var ymin = Math.min.apply(Math, rows.map(function(v) {
-			  return v[1];
-			}));
-			var ymax = Math.max.apply(Math, rows.map(function(v) {
-			  return v[1];
-			}));
+			try {
+				xmin = Math.min.apply(Math, rows.map(function(v) {
+				  return v[0];
+				}));
+				xmax = Math.max.apply(Math, rows.map(function(v) {
+				  return v[0];
+				}));
+				ymin = Math.min.apply(Math, rows.map(function(v) {
+				  return v[1];
+				}));
+				ymax = Math.max.apply(Math, rows.map(function(v) {
+				  return v[1];
+				}));
+			} catch(err) {
+				console.log(err);
+				console.log("Using default size range. [0, 10]");
+			}
 			
 			// This part is not very efficient though
 			// count number of classes in the dataset to change color setting
