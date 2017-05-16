@@ -937,7 +937,7 @@ var Binning = (function() {
 	}
 
 	var draw  = function(data_src, visChoice = null, binSize = null) {
-
+		filename = data_src;
 		// reset old dataset
 		ptData = []; 
 		ptId = 0;
