@@ -34,8 +34,9 @@ PNG of the current vis will be generated under the current visualization after c
 Clicking on the generated image allows you to save the image.
 
 # Notice
-Rendering more than 5000 points in scatterplot will cause extremely bad rendering performance.
-If you want to have quicker rendering speed, please choose other type of vis first so that you won't get stuck on rendering scatterplots.
+1. Rendering more than 5000 points in scatterplot will cause extremely bad rendering performance.
+ If you want to have quicker rendering speed, please choose other type of vis first so that you won't get stuck on rendering scatterplots.
+2. If there are more than 125k data instances, this app will crash due to call stack size. Alternative way is to set your own data range rather than using the built in calculation.
 
 ## Credit
 Our original test implementation from [Alper's block](http://bl.ocks.org/yelper/307b1cef7ef792722d4cbde61099a265)
