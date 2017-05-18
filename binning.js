@@ -589,24 +589,10 @@ var Binning = (function() {
 				.range(d3.range(1,colorBins)); // bin the numerosity into 12 categories
 
 			//var angles = d3.range(0, Math.PI, Math.PI / classNum);
-			var n = Math.ceil(Math.sqrt(classNum));
-			var dx = binRad/n;
-			var dy = binRad/n;
-			
-			var place =[];
-			// should find a better way for choosing position of each block
-			if(n === 2){
-				dx /= 2;
-				dy /= 2;
-				place = [[-dx, -dy],[dx, -dy],
-				[-dx, dy],[dx, dy]
-				];
-			}else{
-				place = [[-dx, -dy],[0, -dy],[dx, -dy],
-				[-dx, 0],[0,0],[dx, 0],
-				[-dx, dy],[0, dy],[dx, dy]
-				];
-			}
+			var n = Math.ceil(Math.sqrt(classNum)); // what's the squarified number to fit numClasses?
+			var dn = binRad/n;                      // how large is each bin?
+			var startn = -(n / 2) * dn;             // what's the starting offset, given the center bin is at 0,0?
+			var offsety = Math.floor(classNum / n) < n ? dn / 2 : 0; // adjust starting y offset if last row is not filled
 
 			var ll = bin_blocks.selectAll('g.binblocks')
 				.data(hexbins, function(d) { return d.i + "," + d.j; });
@@ -630,12 +616,9 @@ var Binning = (function() {
 					.attr('class', 'blkgrp');
 
 				blkgrp.each(function(count, i) {
-					// skip drawing lines if count == 0
-					//if (count == 0) return;
-
 					var thisgrp = d3.select(this);
-					var x = place[i][0]; //( (binRad - 0.5) )* Math.sin(angles[i]);
-					var y = place[i][1];//( (binRad - 0.5) ) * Math.cos(angles[i]);
+					var x = (i % n) * dn + startn;
+					var y = Math.floor(i / n) * dn + startn + offsety;
 
 					var numFreq = freq(count);
 					var colorinter = 
@@ -643,10 +626,10 @@ var Binning = (function() {
 
 					thisgrp.append('rect')
 							.attr({
-								'x': x - binRad/n/2,
-								'y': y - binRad/n/2,
-								'width': binRad/n,
-								'height': binRad/n
+								'x': x,
+								'y': y,
+								'width': dn,
+								'height': dn
 							})
 							.style('fill', colorinter)
 							.style('stroke', 'black')
