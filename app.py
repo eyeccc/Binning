@@ -2,6 +2,7 @@
 # http://code.runnable.com/UiPcaBXaxGNYAAAL/how-to-upload-a-file-to-the-server-in-flask-for-python
 
 import os
+import sys
 # We'll render HTML templates and access data sent by POST
 # using the request object from flask. Redirect and url_for
 # will be used to redirect the user once the upload is done
@@ -9,7 +10,7 @@ import os
 # browser the file that the user just uploaded
 
 # Uncomment this part to set the working directory to where this script runs
-#os.chdir('C:\Users\ching\Desktop\Binning')
+os.chdir(sys.path[0])
 
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug import secure_filename
