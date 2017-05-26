@@ -29,51 +29,16 @@ var Binning = (function() {
 
 	var hexbins = hexbin(ptData);
 
-	var dropdownChange = function() {
-		var e = document.getElementById("opts");
-		var selectedIndex = e.selectedIndex;
-		updateVis(selectedIndex);
-	}
-
-	var dropdownChangeBin = function() {
-		var e = document.getElementById("opts");
-		var selectedIndex = e.selectedIndex;
-		binRad = document.getElementById("myRange").value;
+	var setUpBin = function(bin_radius, selectedIndex) {
+		binRad = bin_radius;
 		hexbin = d3.hexbin()
-							.size([width,height])
-							.radius(binRad);
+					.size([width,height])
+					.radius(binRad);
 		hexbins = hexbin(ptData);
 		if (selectedIndex > 0) {
 			updateVis(selectedIndex);
 		}
 	}
-	
-	var des = [
-	"This is a normal 2D scatterplot.",
-	"This is a hexigonal grid using color blending technique." +
-	"The background color of each bin is the mixture of colors"+
-	" according to weighted sum of different classes.",
-	"This is a hexigonal grid with point glyph."+
-	" The background color of each bin is the mixture of colors "+
-	"according to weighted sum of different classes."+
-	" Points overlay on top of each bin are random sampled.",
-	"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled. However, at least one point of existing class inside each bin will be shown.",
-	"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled. However, at least one point of existing class inside each bin will be shown. If the point is outlier, it is shown as a triangle.",
-	"This is a hexigonal grid with pie charts. The background color of each bin shows the density. The pie chart within each bin shows the proportion of different classes in that bin.",
-	"This is a hexigonal grid with pie charts. The size of each pie chart encodes the density/numerosity within each bin. The pie chart itself shows the proportion of different classes in that bin.",
-	"This is a hexigonal grid using color weaving technique. The background color of each bin shows the color of the majority class within that bin. Weaving technique randomly positions color pixels to show summary and porportion of classes within each bin.",
-	"This is a hexigonal grid using color weaving technique. It shows density of each bin, i.e., the whiter the sparser. Weaving technique randomly positions color pixels to show summary and porportion of classes within each bin.",
-	"This is a hexigonal grid using color+angle. Both color and angle encode class identity. Number of lines are calculated by each classes. Thus, more lines with one color does not necessarily more points than another color.",
-	"This is a hexigonal grid using attribute blocks technique. Position and color within each bin both encode class identity. The numerosity of each class within a bin is shown by different color intensity. If the color is lighter, it means points of that class are less.",
-	"This is a hexigonal grid with bar chart glyph. Bar chart within each bin shows proportion of different classes within that bin. The order of bars is sorted by class label not by numerosity."
-	];
-
-	// track event change (dropdown menu selection change)
-	d3.select('#opts')
-		.on('change',dropdownChange);
-	d3.select('#myRange')
-		.on('change',dropdownChangeBin);
-
 
 	var hexbinFunc = function(visType = -1) {
 				attenuation.domain([.1, d3.max(hexbins.map(function(d) { return d.length; }))]);
@@ -708,8 +673,7 @@ var Binning = (function() {
 	var updateVis = function(selectedIndex) {		
 		// TODO: It is better to do state change detection here, 
 		// so we don't need to redraw everytime we change the dropdown list
-		d3.select("#description p").remove();
-		d3.select("#description").append("p").text(des[selectedIndex]);
+		
 
 		// remove all hexagons
 		d3.selectAll(".hexagons  path").remove();
@@ -819,6 +783,9 @@ var Binning = (function() {
 			.attr('class', 'canvasContainer')
 			.style('width', width + "px") // have to define a width for this to be a placeable div
 			.style('height', height + "px");
+
+		//.append('div')
+		//.attr('id', 'label-container');
 		
 		// add the svg
 		thisSVG.remove();
@@ -837,6 +804,10 @@ var Binning = (function() {
 
 	width = d3.select("svg").attr('width') - margins.left - margins.right;
 	height = d3.select("svg").attr('height') - margins.top - margins.bottom;
+	d3.select("body")
+	  .insert('div', "#label-container")
+	  .attr('height', '100px')
+	  .attr('id', 'label-container');
 
 	var x1 = d3.scale.linear()
 		.domain(xd)
@@ -897,8 +868,8 @@ var Binning = (function() {
 	var ptSize = 3;
 	var ptId = 0;
 	var filename = "cluster-data.csv";
-	var getFileName = function() {
-		filename = document.getElementById("file").files[0].name;
+	var setFileName = function(f_name = undefined) {
+		filename = f_name || document.getElementById("file").files[0].name;
 		//console.log(filename);
 		// TODO: require getting full path length
 		// draw(filename);
@@ -918,7 +889,7 @@ var Binning = (function() {
 	var ymax = 10;
 	var ourRange = false;
 	
-	var setColName = function(
+	var setColAndRange = function(
 		x = "x",
 		y="y",
 		c="category",
@@ -1094,7 +1065,9 @@ var Binning = (function() {
 	
 	return {
 		draw: draw,
-		getFileName: getFileName,
-		setColName: setColName
+		setFileName: setFileName,
+		setColAndRange: setColAndRange,
+		updateVis: updateVis,
+		setUpBin: setUpBin
 	};
 })();

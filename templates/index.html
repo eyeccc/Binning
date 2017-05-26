@@ -131,12 +131,34 @@ h1 {
 		<script src="{{ url_for('static', filename='d3.hexbin.min.js') }}"></script>
 		<script src="{{ url_for('static', filename='binning.js') }}"></script>
 	<script>
+		var des = [
+		"This is a normal 2D scatterplot.",
+		"This is a hexigonal grid using color blending technique." +
+		"The background color of each bin is the mixture of colors"+
+		" according to weighted sum of different classes.",
+		"This is a hexigonal grid with point glyph."+
+		" The background color of each bin is the mixture of colors "+
+		"according to weighted sum of different classes."+
+		" Points overlay on top of each bin are random sampled.",
+		"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled. However, at least one point of existing class inside each bin will be shown.",
+		"This is a hexigonal grid with point glyph. The background color of each bin is the mixture of colors according to weighted sum of different classes. Points overlay on top of each bin are random sampled. However, at least one point of existing class inside each bin will be shown. If the point is outlier, it is shown as a triangle.",
+		"This is a hexigonal grid with pie charts. The background color of each bin shows the density. The pie chart within each bin shows the proportion of different classes in that bin.",
+		"This is a hexigonal grid with pie charts. The size of each pie chart encodes the density/numerosity within each bin. The pie chart itself shows the proportion of different classes in that bin.",
+		"This is a hexigonal grid using color weaving technique. The background color of each bin shows the color of the majority class within that bin. Weaving technique randomly positions color pixels to show summary and porportion of classes within each bin.",
+		"This is a hexigonal grid using color weaving technique. It shows density of each bin, i.e., the whiter the sparser. Weaving technique randomly positions color pixels to show summary and porportion of classes within each bin.",
+		"This is a hexigonal grid using color+angle. Both color and angle encode class identity. Number of lines are calculated by each classes. Thus, more lines with one color does not necessarily more points than another color.",
+		"This is a hexigonal grid using attribute blocks technique. Position and color within each bin both encode class identity. The numerosity of each class within a bin is shown by different color intensity. If the color is lighter, it means points of that class are less.",
+		"This is a hexigonal grid with bar chart glyph. Bar chart within each bin shows proportion of different classes within that bin. The order of bars is sorted by class label not by numerosity."
+		];
 		var params = get_params(location.search);
 		//console.log(params['filename']);
 		var file = params['filename'] ? 
 			"/uploads/" + params['filename'] : 
 			"{{ url_for('static', filename='cluster-data.csv') }}";
 		Binning.draw(file);
+		var e = document.getElementById("opts");
+		var selectedIndex = e.selectedIndex;
+		d3.select("#description").append("p").text(des[selectedIndex]);
 		
 		d3.select('#sampleOpts')
 		.on('change',dropdownChangeData);
@@ -149,6 +171,31 @@ h1 {
 			resetValue();
 			Binning.draw(dataset);
 		}
+
+		d3.select('#opts')
+		.on('change', dropdownChange);
+
+		d3.select('#myRange')
+		.on('change',dropdownChangeBin);
+
+		function dropdownChangeBin () {
+			var e = document.getElementById("opts");
+			var selectedIndex = e.selectedIndex;
+			binRad = document.getElementById("myRange").value;
+			Binning.setUpBin(binRad, selectedIndex);
+		}
+
+		function dropdownChange () {
+			var e = document.getElementById("opts");
+			var selectedIndex = e.selectedIndex;
+			descriptionChange(selectedIndex);
+			Binning.updateVis(selectedIndex);
+		}
+
+		function descriptionChange (selectedIndex) {
+			d3.select("#description p").remove();
+			d3.select("#description").append("p").text(des[selectedIndex]);
+		}
 		
 		function setColumnAndRange() {
 			var xcol = document.getElementById("myText1").value;
@@ -160,7 +207,7 @@ h1 {
 			var ymin = document.getElementById("myText6").value;
 			var ymax = document.getElementById("myText7").value;
 
-			Binning.setColName(xcol, ycol, catcol, xmin, xmax, ymin, ymax);
+			Binning.setColAndRange(xcol, ycol, catcol, xmin, xmax, ymin, ymax);
 		}
 		function resetValue() {
 			document.getElementById("myText1").value = "x";
@@ -217,7 +264,7 @@ h1 {
 		}
 		
 	</script>
-	<div id="label-container"></div>
+	<!--div id="label-container"></div-->
 	<div id="png-container"></div>
 	<canvas id="destCanvas"></canvas>
 
