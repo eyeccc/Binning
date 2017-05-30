@@ -178,9 +178,7 @@ var Binning = (function() {
 							});
 						}
 					});
-				// leave here-----------------------------------------------------------------------------
-				// finally, actually remove the subsampled points
-				// did not really remove anything
+
 				if(visType == VISTYPE.pt2){
 					var plotpts = thisPoints.filter(function(d) { return !d.remove; });
 				
@@ -491,9 +489,6 @@ var Binning = (function() {
 							var shifty = shift * Math.sin(angles[i]);
 						}
 
-						// var pos = k % 2 == 1 ? -1 : 1;
-						// var shift = Math.floor(k / 2) * stepSize * pos;
-
 						thisgrp.append('line')
 							.attr({
 								'x1': x + shiftx,
@@ -542,12 +537,6 @@ var Binning = (function() {
 				});
 			}, Array(classNum).fill(0));
 			
-			//var colorBins = 8;
-			//var freq = d3.scale.quantize()
-			//	.domain([0, d3.max(maxClass)])
-			//	.range(d3.range(0,colorBins)); // bin the numerosity into 12 categories
-
-			//var angles = d3.range(0, Math.PI, Math.PI / classNum);
 			var n = Math.ceil(Math.sqrt(classNum)); // what's the squarified number to fit numClasses?
 			var dn = binRad/n;                      // how large is each bin?
 			var startn = -(n / 2) * dn;             // what's the starting offset, given the center bin is at 0,0?
@@ -579,7 +568,6 @@ var Binning = (function() {
 					var x = (i % n) * dn + startn;
 					var y = Math.floor(i / n) * dn + startn + offsety;
 
-					//var numFreq = freq(count);
 					var colorinter = 
 						d3.interpolateLab("white", colors[i])(count/maxClass[i]);
 
@@ -634,11 +622,10 @@ var Binning = (function() {
 					function(p, d) { 
 						p[d[2]]++; return p;
 					}, Array(classNum).fill(0));
-				//var thisClassNum = thiscount.filter(function(d){return d > 0;}).length;
+				
 				var thisSum = thiscount.reduce(function(acc, val) {
 				  return acc + val;
 				}, 0);
-				//console.log(thisSum);
 
 				var bargrp = thisbin.selectAll('g.bargrp')
 					.data(thiscount);
@@ -646,9 +633,6 @@ var Binning = (function() {
 					.attr('class', 'bargrp');
 
 				bargrp.each(function(count, i) {
-					// skip drawing lines if count == 0
-					//if (count == 0) return;
-
 					var thisgrp = d3.select(this);
 					var w = Math.abs(binRad* Math.cos(30/ Math.PI)*2/classNum)/2; //* Math.cos(30/ Math.PI);
 					var x = -w*classNum/2;//( (binRad - 0.5) )* Math.sin(angles[i]);
@@ -672,9 +656,6 @@ var Binning = (function() {
 
 	var updateVis = function(selectedIndex) {		
 		// TODO: It is better to do state change detection here, 
-		// so we don't need to redraw everytime we change the dropdown list
-		
-
 		// remove all hexagons
 		d3.selectAll(".hexagons  path").remove();
 		// remove all points from scatter plot
@@ -783,9 +764,6 @@ var Binning = (function() {
 			.attr('class', 'canvasContainer')
 			.style('width', width + "px") // have to define a width for this to be a placeable div
 			.style('height', height + "px");
-
-		//.append('div')
-		//.attr('id', 'label-container');
 		
 		// add the svg
 		thisSVG.remove();
@@ -870,9 +848,6 @@ var Binning = (function() {
 	var filename = "cluster-data.csv";
 	var setFileName = function(f_name = undefined) {
 		filename = f_name || document.getElementById("file").files[0].name;
-		//console.log(filename);
-		// TODO: require getting full path length
-		// draw(filename);
 	}
 
 	function onlyUnique(value, index, self) { 
@@ -1040,10 +1015,6 @@ var Binning = (function() {
 		  }
 		);
 	}
-
-	// initial drawing
-	//draw(filename);
-	// you can use draw(filename, visType) to draw the one design you like
 
 	function eucliDist(pt1, pt2) {
 		return Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
