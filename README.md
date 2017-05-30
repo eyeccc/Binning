@@ -27,10 +27,11 @@ var VISTYPE = {
 More usage example of `binning.js` can be seen in `template/index.html`.
 
 # Interaction
-Users can change vis type by using the dropdown list.
-They can adjust the bin size by changing the value of the slider.
-PNG of the current vis will be generated under the current visualization after clicking "generate png" button.
-Clicking on the generated image allows you to save the image.
+1. Use default datasets to see how different types of vis look like.
+2. Upload your own datasets.
+3. Change vis type by using the dropdown list.
+4. Adjust the bin size by changing the value of the slider.
+5. PNG of the current vis will be generated under the current visualization after clicking "generate png" button. Clicking on the generated image allows you to save the image.
 
 # Notice
 1. Rendering more than 5000 points in scatterplot will cause extremely bad rendering performance.
