@@ -542,10 +542,10 @@ var Binning = (function() {
 				});
 			}, Array(classNum).fill(0));
 			
-			var colorBins = 8;
-			var freq = d3.scale.quantize()
-				.domain([0, d3.max(maxClass)])
-				.range(d3.range(1,colorBins)); // bin the numerosity into 12 categories
+			//var colorBins = 8;
+			//var freq = d3.scale.quantize()
+			//	.domain([0, d3.max(maxClass)])
+			//	.range(d3.range(0,colorBins)); // bin the numerosity into 12 categories
 
 			//var angles = d3.range(0, Math.PI, Math.PI / classNum);
 			var n = Math.ceil(Math.sqrt(classNum)); // what's the squarified number to fit numClasses?
@@ -579,9 +579,9 @@ var Binning = (function() {
 					var x = (i % n) * dn + startn;
 					var y = Math.floor(i / n) * dn + startn + offsety;
 
-					var numFreq = freq(count);
+					//var numFreq = freq(count);
 					var colorinter = 
-						d3.interpolateLab("white", colors[i])(numFreq/colorBins);
+						d3.interpolateLab("white", colors[i])(count/maxClass[i]);
 
 					thisgrp.append('rect')
 							.attr({
