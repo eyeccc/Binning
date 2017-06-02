@@ -82,9 +82,9 @@ h1 {
 		</select>
 	</div>
 	<div>
-	Upload dataset (only support csv):
+	Upload dataset (<strong>only support csv</strong>):
 		<form action="upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
+        <input type="file" name="file" id="csvfile">
         <input type="submit" value="Upload">
       </form>
 	</div>
@@ -171,7 +171,17 @@ h1 {
 			resetValue();
 			Binning.draw(dataset);
 		}
-
+		$(document).ready(function() {
+			$("input#csvfile").on("change", function() {
+				var dealers = $("input#csvfile");
+				var arrfilepath = dealers.val().split("\\");
+				var filename = arrfilepath[arrfilepath.length - 1];
+				var extension = filename.split('.').pop();
+				if (extension != "csv") {
+					alert("Wrong file type! This app only supports csv files.");
+				}
+			});
+		});
 		d3.select('#opts')
 		.on('change', dropdownChange);
 

@@ -65,6 +65,19 @@ var Binning = (function() {
 							counts[p[2]]++;
 						});
 						
+						// this part is for returning the color of the majority class
+						// and it is not shown in the demo
+						/*var idx = 0;
+						var maxxx = 0;
+						for (var i = 0; i< classNum; i++) {
+							if(counts[i] > maxxx) {
+								maxxx = counts[i];
+								idx = i;
+							}
+						}
+						return colors[idx];*/
+						//---var colors1 = d3.scale.category10().range().slice(0, 4); 
+						//---return colors1[3];
 						return counts.reduce(function(p, c, i) { 
 							return d3.interpolateLab(p, colors[i])(c / d.length);
 						}, "white");
@@ -76,6 +89,13 @@ var Binning = (function() {
 					.style('fill', function(d) { 
 					return lightnessScale(d.length); 
 				});
+				
+				/*d3.selectAll(" .hexagons > path")
+				.attr('d', hexbin.hexagon(Math.ceil( (binRad - 0.5))))
+				//.style('fill', 'none')
+				.style('stroke', "#333")
+				.style('stroke-width', '1');*/
+				
 			}
 	}
 
