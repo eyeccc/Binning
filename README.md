@@ -1,5 +1,5 @@
 # Binning
-Exploration of Visual Designs for Binned Aggregation of Multi-Class Data
+Exploration of Visual Designs for Binned Aggregation of Multi-Class Data: We survey different possible visual representation of binning and assess suitable tasks for different designs.
 
 # Usage
 1. Run `app.py` and goto `localhost:5000`.
