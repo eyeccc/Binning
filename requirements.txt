@@ -2,7 +2,7 @@ click==6.7
 docutils==0.13.1
 Flask==1.0
 itsdangerous==0.24
-Jinja2==2.10.1
+Jinja2==2.11.3
 MarkupSafe==1.0
 mercurial==4.2rc0
 virtualenv==15.1.0
